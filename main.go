@@ -4,8 +4,10 @@ package main
 // 1. Board initialiser - this is a method which just returns a board.
 // 2. Scoring function
 // 3. Board mmutator
+// 4. A string-based notation for the move.
+// 5. A player-perspective on the board, so that confusions regarding clockwise/counterclockwise etc are easily resolved.
 
-// Questions:
+// Go Questions:
 // Q 1. What is a slice?
 //
 // Q 2. How do you add a method to a type
@@ -16,7 +18,10 @@ package main
 //   And can be passed to another method which takes that interface.
 //   Still not sure about the details of this but it sounds quite interesting.
 
+
+
 import "fmt"
+import "math/rand"
 
 type Board struct {
 	positions [4][8]int
@@ -57,18 +62,29 @@ func (this Board) naive_scorers() (int,int) {
 	return player_1_score, player_2_score
 }
 
-func random_board() (Board) {
-	var newboard Board
+func random_board(num_seeds int) (Board) {
+	// TODO: remove the repetition from here, I expect there are smarter ways to get
+	// a uniformly-distributed number
+	var newboard Board;
+	// do the first player first
+
+	for i:=0; i<num_seeds; i++ {
+		row := rand.Intn(2)
+		column := rand.Intn(8)
+		newboard.positions[row][column] += 1
+	}
+
+	//then the second
+	for i:=0; i<num_seeds; i++ {
+		row := rand.Intn(2) + 2
+		column := rand.Intn(8)
+		newboard.positions[row][column] += 1
+	}
 	return newboard
-	
 }
 
 func main() {
-	fmt.Println("Instantiating a uniform board")
-	newboard := uniform_board(4)
+	fmt.Println("Instantiating a random board")
+	newboard := random_board(20)
 	fmt.Println(newboard)
-	add_seeds(&newboard,1,1,3)
-	fmt.Println(newboard)
-	fmt.Println(newboard.naive_scorers())
-	fmt.Println(newboard.zero_zero())
 }
