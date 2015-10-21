@@ -57,6 +57,12 @@ func (this Board) naive_scorers() (int,int) {
 	return player_1_score, player_2_score
 }
 
+func random_board() (Board) {
+	var newboard Board
+	return newboard
+	
+}
+
 func main() {
 	fmt.Println("Instantiating a uniform board")
 	newboard := uniform_board(4)
