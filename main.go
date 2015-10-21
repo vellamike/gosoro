@@ -18,8 +18,6 @@ package main
 //   And can be passed to another method which takes that interface.
 //   Still not sure about the details of this but it sounds quite interesting.
 
-
-
 import "fmt"
 import "math/rand"
 
@@ -67,7 +65,6 @@ func random_board(num_seeds int) (Board) {
 	// a uniformly-distributed number
 	var newboard Board;
 	// do the first player first
-
 	for i:=0; i<num_seeds; i++ {
 		row := rand.Intn(2)
 		column := rand.Intn(8)
@@ -81,6 +78,17 @@ func random_board(num_seeds int) (Board) {
 		newboard.positions[row][column] += 1
 	}
 	return newboard
+}
+
+func crazy_mutator(instruction string, board *Board) {
+	// Given the instruction, the (in RCD format) this mutator
+	// Will move one piece in that direction.
+	// For the columnn moved to, whichever player has the highest
+	// number of seeds gets to keep their seeds, while all seeds in
+	// the opposing column are destroyed.
+	
+	row := int(instruction)[0]
+	return board
 }
 
 func main() {
