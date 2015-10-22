@@ -18,30 +18,22 @@ package main
 //   And can be passed to another method which takes that interface.
 //   Still not sure about the details of this but it sounds quite interesting.
 
+// UPDATE: I've decided that the 4x8 board representation is very unhelpful.
+// The 2x2x8 is better, that is to say, the board is represented as two player views.
+// Each player view is a 2x8 board.
+// For calcuations of scores this can still be mapped to the 4x8 representation if need be,
+// But for carrying out mutations this is a much more simple strategy.
+
 import "fmt"
 import "math/rand"
 
+type player struct {
+	positions [2][8]int
+}
+
 type Board struct {
-	positions [4][8]int
-}
-
-func (this Board) zero_zero() (int){
-	return this.positions[0][0]
-}
-
-func uniform_board(seeds int) (Board) {
-	newboard := Board{}
-	for i := range newboard.positions {
-		for j := range newboard.positions[i] {
-			newboard.positions[i][j] = seeds
-		}
-	}
-	return newboard
-}
-
-func add_seeds(board *Board, row int, column int, num_seeds int){
-	// Add a seed to a specific row and column
-	board.positions[row][column] += num_seeds
+	player_1 player
+	player_2 player
 }
 
 func row_sum(intarray [8]int) (int) {
@@ -52,47 +44,34 @@ func row_sum(intarray [8]int) (int) {
 	return sum
 }
 
-func (this Board) naive_scorers() (int,int) {
-
-	player_1_score := row_sum(this.positions[0]) + row_sum(this.positions[1]);
-	player_2_score := row_sum(this.positions[2]) + row_sum(this.positions[3]);
-
-	return player_1_score, player_2_score
+func (this player) naive_score() (score int) {
+	score = row_sum(this.positions[0]) + row_sum(this.positions[1]);
+	return
 }
 
-func random_board(num_seeds int) (Board) {
-	// TODO: remove the repetition from here, I expect there are smarter ways to get
-	// a uniformly-distributed number
-	var newboard Board;
-	// do the first player first
+func random_position(num_seeds int) (player) {
+	var p player
+
 	for i:=0; i<num_seeds; i++ {
 		row := rand.Intn(2)
 		column := rand.Intn(8)
-		newboard.positions[row][column] += 1
+		p.positions[row][column] += 1
 	}
 
-	//then the second
-	for i:=0; i<num_seeds; i++ {
-		row := rand.Intn(2) + 2
-		column := rand.Intn(8)
-		newboard.positions[row][column] += 1
-	}
-	return newboard
+	return p
+	
 }
 
-func crazy_mutator(instruction string, board *Board) {
-	// Given the instruction, the (in RCD format) this mutator
-	// Will move one piece in that direction.
-	// For the columnn moved to, whichever player has the highest
-	// number of seeds gets to keep their seeds, while all seeds in
-	// the opposing column are destroyed.
-	
-	row := int(instruction)[0]
-	return board
+func random_board(num_seeds int) (Board) {
+	var newboard Board;
+
+	newboard.player_1 = random_position(num_seeds)
+	newboard.player_2 = random_position(num_seeds)
+
+	return newboard
 }
 
 func main() {
 	fmt.Println("Instantiating a random board")
-	newboard := random_board(20)
-	fmt.Println(newboard)
+	newboard := random_board(202)
 }
