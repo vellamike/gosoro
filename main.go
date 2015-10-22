@@ -1,5 +1,7 @@
 package main
 
+// Initial rules: No reversing, only victory is if other player can't move
+
 // Need the following methods:
 // 1. Board initialiser - this is a method which just returns a board.
 // 2. Scoring function
@@ -24,6 +26,11 @@ package main
 // For calcuations of scores this can still be mapped to the 4x8 representation if need be,
 // But for carrying out mutations this is a much more simple strategy.
 
+// Thoughts on mutators:
+// In some positions a decision can be made whether to go clockwise or counterclockwise.
+// Some sort of tree is going to be needed to keep track of decisions, OR we could not
+// implement this aspect of it for now.
+
 import "fmt"
 import "math/rand"
 
@@ -43,6 +50,7 @@ func row_sum(intarray [8]int) (int) {
 	}
 	return sum
 }
+
 
 func (this player) naive_score() (score int) {
 	score = row_sum(this.positions[0]) + row_sum(this.positions[1]);
@@ -71,7 +79,47 @@ func random_board(num_seeds int) (Board) {
 	return newboard
 }
 
+
+func move(board Board, player_number int, row, column int) (Board) {
+	// Move counterclockwise.
+	// For now don't capture or re-move
+	var p *player
+
+	if player_number == 1 {
+		p = &board.player_1
+	} else {
+		p = &board.player_2
+	}
+
+	num_seeds := p.positions[row][column]
+
+	//Now do the clockwise moving
+	fmt.Println("Number of seeds:")
+	fmt.Println(num_seeds)
+
+	current_row := row
+	current_column := column
+	p.positions[row][column] = 0 // empty the starting pit
+	for i := 0; i < num_seeds; i++{
+		// get the new current row and current column
+		switch {
+		case current_row == 0 && current_column < 7:
+			current_column += 1
+		case current_row == 0 && current_column == 7:
+			current_row = 1
+	        case current_row == 1 && current_column > 0:
+			current_column -= 1
+	        case current_row == 1 && current_column == 0:
+			current_row = 0
+		}
+		p.positions[current_row][current_column] += 1
+	}
+	return board
+}
+
 func main() {
 	fmt.Println("Instantiating a random board")
-	newboard := random_board(202)
+	newboard := random_board(32)
+	moved_board := move(newboard, 1, 1, 2)
+	fmt.Println(moved_board.player_1)
 }
