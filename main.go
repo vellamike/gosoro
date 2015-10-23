@@ -84,17 +84,27 @@ func move(board Board, player_number int, row, column int) (Board) {
 	// Move counterclockwise.
 	// For now don't capture or re-move
 	var p *player
+	var p_op *player
 
 	if player_number == 1 {
 		p = &board.player_1
+		p_op = &board.player_2
 	} else {
 		p = &board.player_2
+		p_op = &board.player_1
 	}
+
+	fmt.Println("Initial position of player:")
+	fmt.Println(p)
+
+	fmt.Println("Initial position of opponent:")
+	fmt.Println(p_op)
+		
 
 	num_seeds := p.positions[row][column]
 
 	//Now do the clockwise moving
-	fmt.Println("Number of seeds:")
+	fmt.Println("Number of seeds player will move:")
 	fmt.Println(num_seeds)
 
 	current_row := row
@@ -114,12 +124,32 @@ func move(board Board, player_number int, row, column int) (Board) {
 		}
 		p.positions[current_row][current_column] += 1
 	}
+
+	oponent_column := 7 - current_column // oponent's column
+	fmt.Println("Opponent column targeted:")
+	fmt.Println(oponent_column)
+	oponent_row_0_seeds := p_op.positions[0][oponent_column]
+	oponent_row_1_seeds := p_op.positions[1][oponent_column]
+	if (oponent_row_0_seeds != 0 && oponent_row_1_seeds != 0 && current_row == 1) { // capture occurs
+		fmt.Println("Capture!")
+		p_op.positions[0][oponent_column] = 0
+		p_op.positions[1][oponent_column] = 0
+		captured_seeds := oponent_row_0_seeds + oponent_row_1_seeds
+		fmt.Println("Captured seeds:")
+		fmt.Println(captured_seeds)
+		p.positions[current_row][current_column] += captured_seeds
+		board = move(board, player_number, current_row, current_column)
+	}
+
 	return board
 }
 
 func main() {
 	fmt.Println("Instantiating a random board")
-	newboard := random_board(32)
+	newboard := random_board(12)
 	moved_board := move(newboard, 1, 1, 2)
+	fmt.Println("Final position of player 1:")
 	fmt.Println(moved_board.player_1)
+	fmt.Println("Final position of opponent:")
+	fmt.Println(moved_board.player_2)
 }
