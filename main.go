@@ -124,7 +124,6 @@ func perform_capture(board Board, player_number, row, column int) (Board, []Inst
 	var next_instructions []Instruction
 
 	if board.is_bidirectional(row, column) {
-		fmt.Println("Found a bidirectional board")
 		i1 := Instruction{row, column, "C"}
 		i2 := Instruction{row, column, "A"}
 		next_instructions = []Instruction{i1, i2}
@@ -142,7 +141,6 @@ func execute_instruction(instruction Instruction, board Board, player_number int
 	// no while loops, just execute the instruction, including a capture, and return the board along with any next moves
 
 	num_seeds := p.positions[current_row][current_column]
-	fmt.Println("Number of seeds: ", num_seeds)
 	p.positions[current_row][current_column] = 0 // empty the starting pit
 	for i := 0; i < num_seeds; i++ {             //move the seeds, currently not using direction
 		current_row, current_column = next_position(current_row, current_column, current_direction)
@@ -151,7 +149,6 @@ func execute_instruction(instruction Instruction, board Board, player_number int
 
 	// now for the capturing
 	if capture_possible(board, player_number, current_row, current_column) {
-		fmt.Println("About to performm a capture")
 		board, next_instructions = perform_capture(board, player_number, current_row, current_column)
 	}
 	return board, next_instructions
@@ -189,9 +186,13 @@ func all_moves(board Board, player_number int) (boards []Board, instructions [][
 		}
 	}
 	fmt.Println(initial_instructions)
+
+	// Now need to build a stack of instructions and corresponding boards, then consume from it.
+	// populating the boards and instructions slices as leaf nodes are reached
+
 	// now start executing the instructions, adding new instructions to the stack
 
-	for _, instuc := rrange initial_instructions{
+	for _, instruc := range initial_instructions {
 		execute_instruction(instruc, board, player_number)
 	}
 	return
