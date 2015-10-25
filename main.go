@@ -146,5 +146,5 @@ func main() {
 	fmt.Println(terminal_board)
 	fmt.Println(moved_board)
 	fmt.Println(instructions)
-	fmt.Println(strconv.convert(1))
+	fmt.Println(string(1))
 }
