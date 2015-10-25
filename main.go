@@ -118,40 +118,32 @@ func perform_capture(board Board, player_number, row, column int) (Board, []Inst
 	return board, next_instructions
 }
 
-func execute_instruction() {
-	// this method should take as an argument a board, player number and an instruction
-	// It should return the modified board and any subsequent instructions
-	// A controller loop (e.g `move`) could then make calls to this method until all
-	// leaf boards have been found
-}
-
-func move(instruction Instruction, board Board, player_number int) (final_board Board, next_instructions []Instruction) {
+func execute_instruction(instruction Instruction, board Board, player_number int) (Board, []Instruction) {
 	p, _ := players_from_name(player_number, &board)
+	current_row := instruction.row
+	current_column := instruction.column
+	current_direction := instruction.direction
+	var next_instructions []Instruction
 
-	leaf_board := false // whether or not a leaf board has been reached
-	row := instruction.row
-	column := instruction.column
-	direction := instruction.direction
+	// no while loops, just execute the instruction, including a capture, and return the board along with any next moves
 
-	for (leaf_board == false) && (len(next_instructions) == 0) {
-		fmt.Println("Performing a move")
-		num_seeds := p.positions[row][column]
-		fmt.Println("Number of seeds:")
-		fmt.Println(num_seeds)
-		p.positions[row][column] = 0     // empty the starting pit
-		for i := 0; i < num_seeds; i++ { //move the seeds, currently not using direction
-			row, column = next_position(row, column, direction)
-			p.positions[row][column] += 1
-		}
+	fmt.Println("Performing a move")
+	num_seeds := p.positions[current_row][current_row]
+	p.positions[current_row][current_column] = 0     // empty the starting pit
+	for i := 0; i < num_seeds; i++ { //move the seeds, currently not using direction
+		current_row, current_column = next_position(current_row, current_column, current_direction)
+		p.positions[current_row][current_column] += 1
+	}
 
-		if capture_possible(board, player_number, row, column) {
-			direction = "A" // If next_instructions has not been populated, the direction should be A
-			board, next_instructions = perform_capture(board, player_number, row, column)
-		} else {
-			leaf_board = true
-		}
+	// now for the capturing
+	if capture_possible(board, player_number, current_row, current_column) {
+		board, next_instructions = perform_capture(board, player_number, current_row, current_column)
 	}
 	return board, next_instructions
+}
+
+func all_moves(board Board, player_number int) (boards []Board, instructions [][]Instruction) {
+	return
 }
 
 func main() {
@@ -160,7 +152,9 @@ func main() {
 	fmt.Println(newboard)
 	new_instruction := Instruction{1, 2, "C"}
 	fmt.Println(new_instruction)
-	board, instructions := move(new_instruction, newboard, 1) // if there are no instructions, it is a terminal board
+	board, instructions := execute_instruction(new_instruction, newboard, 1)
 	fmt.Println(board)
 	fmt.Println(instructions)
+	// test the ability to execute an instruction
+	// TODO: write `all_moves`, which will provide an array with all instructions and corresponding final boards
 }
