@@ -190,6 +190,10 @@ func all_moves(board Board, player_number int) (boards []Board, instructions [][
 	}
 	fmt.Println(initial_instructions)
 	// now start executing the instructions, adding new instructions to the stack
+
+	for _, instuc := rrange initial_instructions{
+		execute_instruction(instruc, board, player_number)
+	}
 	return
 }
 
