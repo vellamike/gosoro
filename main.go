@@ -179,24 +179,24 @@ func all_moves(board Board, player_number int) (boards []Board, instructions [][
 		}
 	}
 
+	var initial_instructions []Instruction
 	for _, c := range coords {
+		instruction := Instruction{c.row, c.column, "A"}
+		initial_instructions = append(initial_instructions, instruction)
 		if board.is_bidirectional(c.row, c.column) {
-			fmt.Println("Bidirectional")
-		} else {
-			fmt.Println("Not bidirectional")
+			instruction = Instruction{c.row, c.column, "C"}
+			initial_instructions = append(initial_instructions, instruction)
 		}
 	}
+	fmt.Println(initial_instructions)
+	// now start executing the instructions, adding new instructions to the stack
 	return
 }
 
 func main() {
 	fmt.Println("Instantiating a random board")
-	newboard := random_board(12)
+	newboard := random_board(16)
 	newboard.display()
+	fmt.Println("Instructions available:")
 	all_moves(newboard, 1)
-	new_instruction := Instruction{1, 2, "A"}
-	fmt.Println("executing instruction:", new_instruction)
-	board, next_instruction := execute_instruction(new_instruction, newboard, 1)
-	board.display()
-	fmt.Println(next_instruction)
 }
