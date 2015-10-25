@@ -1,5 +1,10 @@
 package main
 
+// Thought on design:
+// Adding new instructions to the stack shouldn't just be something to do when a bidirectional node occurs
+// rather, once a move is completed the next instruction/s, if there are any, should be added to the stack
+// along with the mutated board
+
 import "fmt"
 import "math/rand"
 
@@ -51,15 +56,23 @@ func random_board(num_seeds int) Board {
 	return newboard
 }
 
-func next_position(current_row, current_column int) (int, int) {
+func next_position(current_row, current_column int, direction string) (int, int) {
 	switch {
-	case current_row == 0 && current_column < 7:
+	case current_row == 0 && current_column < 7 && direction == "A":
 		current_column += 1
-	case current_row == 0 && current_column == 7:
+	case current_row == 0 && current_column == 7 && direction == "A":
 		current_row = 1
-	case current_row == 1 && current_column > 0:
+	case current_row == 1 && current_column > 0 && direction == "A":
 		current_column -= 1
-	case current_row == 1 && current_column == 0:
+	case current_row == 1 && current_column == 0 && direction == "A":
+		current_row = 0
+	case current_row == 0 && current_column > 0 && direction == "C": // move left on bottom row
+		current_column -= 1
+	case current_row == 0 && current_column == 0 && direction == "C": // move up to top row
+		current_row = 1
+	case current_row == 1 && current_column < 7 && direction == "C": // move right on top row
+		current_column += 1
+	case current_row == 1 && current_column == 7 && direction == "C": // move down to bottom row
 		current_row = 0
 	}
 	return current_row, current_column
@@ -75,13 +88,50 @@ func players_from_name(player_number int, board *Board) (p, p_op *player) {
 	}
 	return p, p_op
 }
-func move(instruction Instruction, board Board, player_number int) (final_board Board, next_instructions []Instruction) {
+
+func capture_possible(board Board, player_number, row, column int) bool {
+	_, p_op := players_from_name(player_number, &board)
+	opponent_column := 7 - column
+	opponent_row_0_seeds := p_op.positions[0][opponent_column]
+	opponent_row_1_seeds := p_op.positions[1][opponent_column]
+	return (opponent_row_0_seeds != 0 && opponent_row_1_seeds != 0 && row == 1)
+}
+
+func perform_capture(board Board, player_number, row, column int) (Board, []Instruction) {
 	p, p_op := players_from_name(player_number, &board)
+	opponent_column := 7 - column
+	p_op.positions[0][opponent_column] = 0
+	p_op.positions[1][opponent_column] = 0
+	opponent_row_0_seeds := p_op.positions[0][opponent_column]
+	opponent_row_1_seeds := p_op.positions[1][opponent_column]
+	captured_seeds := opponent_row_0_seeds + opponent_row_1_seeds
+	p.positions[row][column] += captured_seeds
+
+	var next_instructions []Instruction
+
+	if board.is_bidirectional(player_number, row, column) {
+		fmt.Println("Found a bidirectional board")
+		i1 := Instruction{row, column, "C"}
+		i2 := Instruction{row, column, "A"}
+		next_instructions = []Instruction{i1, i2}
+	}
+	return board, next_instructions
+}
+
+func execute_instruction() {
+	// this method should take as an argument a board, player number and an instruction
+	// It should return the modified board and any subsequent instructions
+	// A controller loop (e.g `move`) could then make calls to this method until all
+	// leaf boards have been found
+}
+
+func move(instruction Instruction, board Board, player_number int) (final_board Board, next_instructions []Instruction) {
+	p, _ := players_from_name(player_number, &board)
 
 	leaf_board := false // whether or not a leaf board has been reached
-	//var next_instructions []Instruction       // If not a leaf node, the instructions available from this board
 	row := instruction.row
 	column := instruction.column
+	direction := instruction.direction
 
 	for (leaf_board == false) && (len(next_instructions) == 0) {
 		fmt.Println("Performing a move")
@@ -90,25 +140,13 @@ func move(instruction Instruction, board Board, player_number int) (final_board 
 		fmt.Println(num_seeds)
 		p.positions[row][column] = 0     // empty the starting pit
 		for i := 0; i < num_seeds; i++ { //move the seeds, currently not using direction
-			row, column = next_position(row, column) // direction would go in here
+			row, column = next_position(row, column, direction)
 			p.positions[row][column] += 1
 		}
-		oponent_column := 7 - column
-		oponent_row_0_seeds := p_op.positions[0][oponent_column]
-		oponent_row_1_seeds := p_op.positions[1][oponent_column]
-		if oponent_row_0_seeds != 0 && oponent_row_1_seeds != 0 && row == 1 { // capture occurs
-			fmt.Println("Capture occured!")
-			p_op.positions[0][oponent_column] = 0
-			p_op.positions[1][oponent_column] = 0
-			captured_seeds := oponent_row_0_seeds + oponent_row_1_seeds
-			p.positions[row][column] += captured_seeds
-			//if a capture occurs, need to evaluate whether there is more than one possible decision
-			if board.is_bidirectional(player_number, row, column) {
-				fmt.Println("Found a bidirectional board")
-				i1 := Instruction{row, column, "C"}
-				i2 := Instruction{row, column, "A"}
-				next_instructions = []Instruction{i1, i2}
-			}
+
+		if capture_possible(board, player_number, row, column) {
+			direction = "A" // If next_instructions has not been populated, the direction should be A
+			board, next_instructions = perform_capture(board, player_number, row, column)
 		} else {
 			leaf_board = true
 		}
@@ -120,7 +158,7 @@ func main() {
 	fmt.Println("Instantiating a random board")
 	newboard := random_board(12)
 	fmt.Println(newboard)
-	new_instruction := Instruction{1, 2, "A"}
+	new_instruction := Instruction{1, 2, "C"}
 	fmt.Println(new_instruction)
 	board, instructions := move(new_instruction, newboard, 1) // if there are no instructions, it is a terminal board
 	fmt.Println(board)
