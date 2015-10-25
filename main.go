@@ -12,6 +12,13 @@ type player struct {
 	positions [2][8]int
 }
 
+type coord struct {
+	row    int
+	column int
+	board  *Board
+	player *player
+}
+
 type Board struct {
 	player_1 player
 	player_2 player
@@ -23,10 +30,10 @@ type Instruction struct {
 	direction string
 }
 
-func (this Board) is_bidirectional(player, row, column int) bool {
+func (this Board) is_bidirectional(row, column int) bool {
 	var bidir bool
 	//Omweso rules
-	if column == 0 || column == 2 || column == 6 || column == 7 {
+	if column == 0 || column == 1 || column == 6 || column == 7 {
 		bidir = true
 	} else {
 		bidir = false
@@ -116,7 +123,7 @@ func perform_capture(board Board, player_number, row, column int) (Board, []Inst
 
 	var next_instructions []Instruction
 
-	if board.is_bidirectional(player_number, row, column) {
+	if board.is_bidirectional(row, column) {
 		fmt.Println("Found a bidirectional board")
 		i1 := Instruction{row, column, "C"}
 		i2 := Instruction{row, column, "A"}
@@ -136,8 +143,8 @@ func execute_instruction(instruction Instruction, board Board, player_number int
 
 	num_seeds := p.positions[current_row][current_column]
 	fmt.Println("Number of seeds: ", num_seeds)
-	p.positions[current_row][current_column] = 0     // empty the starting pit
-	for i := 0; i < num_seeds; i++ { //move the seeds, currently not using direction
+	p.positions[current_row][current_column] = 0 // empty the starting pit
+	for i := 0; i < num_seeds; i++ {             //move the seeds, currently not using direction
 		current_row, current_column = next_position(current_row, current_column, current_direction)
 		p.positions[current_row][current_column] += 1
 	}
@@ -150,16 +157,35 @@ func execute_instruction(instruction Instruction, board Board, player_number int
 	return board, next_instructions
 }
 
-func reverse_array(arr [8]int) ([8]int){
+func reverse_array(arr [8]int) [8]int {
 	num_elements := len(arr)
 	var reversed_array [8]int
 	for i := 0; i < num_elements; i++ {
-		reversed_array[i] = arr[num_elements - i -1]
+		reversed_array[i] = arr[num_elements-i-1]
 	}
 	return reversed_array
 }
 
 func all_moves(board Board, player_number int) (boards []Board, instructions [][]Instruction) {
+	// first find all rows and columns with more than two
+	p, _ := players_from_name(player_number, &board)
+	var coords []coord
+	for row_index, row := range p.positions {
+		for column_index, num_seeds := range row {
+			if num_seeds > 1 {
+				coord := coord{row_index, column_index, &board, p}
+				coords = append(coords, coord)
+			}
+		}
+	}
+
+	for _, c := range coords {
+		if board.is_bidirectional(c.row, c.column) {
+			fmt.Println("Bidirectional")
+		} else {
+			fmt.Println("Not bidirectional")
+		}
+	}
 	return
 }
 
@@ -167,6 +193,7 @@ func main() {
 	fmt.Println("Instantiating a random board")
 	newboard := random_board(12)
 	newboard.display()
+	all_moves(newboard, 1)
 	new_instruction := Instruction{1, 2, "A"}
 	fmt.Println("executing instruction:", new_instruction)
 	board, next_instruction := execute_instruction(new_instruction, newboard, 1)
