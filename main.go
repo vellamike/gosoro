@@ -1,44 +1,7 @@
 package main
 
-// Initial rules: No reversing, only victory is if other player can't move
-
-// Need the following methods:
-// 1. Board initialiser - this is a method which just returns a board.
-// 2. Scoring function
-// 3. Board mmutator
-// 4. A string-based notation for the move.
-// 5. A player-perspective on the board, so that confusions regarding clockwise/counterclockwise etc are easily resolved.
-
-// Go Questions:
-// Q 1. What is a slice?
-//
-// Q 2. How do you add a method to a type
-// A func (this Type) func_name(func_param param_type) (return_type) {...}
-//
-// Q 3. What is an interface
-// A If a type has all the correct function names, including signatures, then it satisfies an interface
-//   And can be passed to another method which takes that interface.
-//   Still not sure about the details of this but it sounds quite interesting.
-// Q how do maps work in go?
-//
-
-// UPDATE: I've decided that the 4x8 board representation is very unhelpful.
-// The 2x2x8 is better, that is to say, the board is represented as two player views.
-// Each player view is a 2x8 board.
-// For calcuations of scores this can still be mapped to the 4x8 representation if need be,
-// But for carrying out mutations this is a much more simple strategy.
-
-// Thoughts on mutators:
-// In some positions a decision can be made whether to go clockwise or counterclockwise.
-// Some sort of tree is going to be needed to keep track of decisions, OR we could not
-// implement this aspect of it for now.
-
-// Instruction Format: RCD (row, column, direction)
-// Example: 02C or 16A
-
 import "fmt"
 import "math/rand"
-import "strconv"
 
 type player struct {
 	positions [2][8]int
@@ -49,8 +12,21 @@ type Board struct {
 	player_2 player
 }
 
-func (this Board) is_birectional(player, row, column int) bool {
-	return false
+type Instruction struct {
+	row       int
+	column    int
+	direction string
+}
+
+func (this Board) is_bidirectional(player, row, column int) bool {
+	var bidir bool
+	//Omweso rules
+	if column == 0 || column == 2 || column == 6 || column == 7 {
+		bidir = true
+	} else {
+		bidir = false
+	}
+	return bidir
 }
 
 func random_position(num_seeds int) player {
@@ -99,52 +75,54 @@ func players_from_name(player_number int, board *Board) (p, p_op *player) {
 	}
 	return p, p_op
 }
-func move(row, column int, direction string, board Board, player_number int) (terminal_board bool, final_board Board, next_instructions []string) {
+func move(instruction Instruction, board Board, player_number int) (final_board Board, next_instructions []Instruction) {
 	p, p_op := players_from_name(player_number, &board)
 
-	terminal_board = false // whether or not a leaf board has been reached
-	var ins []string       // If not a leaf node, the instructions available from this board
-	for (terminal_board == false) || len(ins) != 0 {
+	leaf_board := false // whether or not a leaf board has been reached
+	//var next_instructions []Instruction       // If not a leaf node, the instructions available from this board
+	row := instruction.row
+	column := instruction.column
+
+	for (leaf_board == false) && (len(next_instructions) == 0) {
+		fmt.Println("Performing a move")
 		num_seeds := p.positions[row][column]
+		fmt.Println("Number of seeds:")
+		fmt.Println(num_seeds)
 		p.positions[row][column] = 0     // empty the starting pit
 		for i := 0; i < num_seeds; i++ { //move the seeds, currently not using direction
-			row, column = next_position(row, column)
+			row, column = next_position(row, column) // direction would go in here
 			p.positions[row][column] += 1
-		} // need a separate method to perform the capture (lines below)
-		// and a new one to decide what moves are available from that
-		// from the new position, which in any case will be useful separately
-		oponent_column := 7 - column // oponent's column
+		}
+		oponent_column := 7 - column
 		oponent_row_0_seeds := p_op.positions[0][oponent_column]
 		oponent_row_1_seeds := p_op.positions[1][oponent_column]
 		if oponent_row_0_seeds != 0 && oponent_row_1_seeds != 0 && row == 1 { // capture occurs
+			fmt.Println("Capture occured!")
 			p_op.positions[0][oponent_column] = 0
 			p_op.positions[1][oponent_column] = 0
 			captured_seeds := oponent_row_0_seeds + oponent_row_1_seeds
 			p.positions[row][column] += captured_seeds
 			//if a capture occurs, need to evaluate whether there is more than one possible decision
-			if board.is_birectional(player_number, row, column) {
-				//this is never evaluated fo rnow, but will need to append new instructions
+			if board.is_bidirectional(player_number, row, column) {
+				fmt.Println("Found a bidirectional board")
+				i1 := Instruction{row, column, "C"}
+				i2 := Instruction{row, column, "A"}
+				next_instructions = []Instruction{i1, i2}
 			}
 		} else {
-			terminal_board = true
+			leaf_board = true
 		}
 	}
-	return terminal_board, board, ins
+	return board, next_instructions
 }
-
-// methods needed:
-
-// 1. Return an array of all available layer-1 instructions
-// 2. Consume that array, returning a list of all final boards and corresponding instructions,
-//    including those for instructions which did not evaluate to leaf boards
 
 func main() {
 	fmt.Println("Instantiating a random board")
 	newboard := random_board(12)
 	fmt.Println(newboard)
-	terminal_board, moved_board, instructions := move(1, 2, "A", newboard, 1)
-	fmt.Println(terminal_board)
-	fmt.Println(moved_board)
+	new_instruction := Instruction{1, 2, "A"}
+	fmt.Println(new_instruction)
+	board, instructions := move(new_instruction, newboard, 1) // if there are no instructions, it is a terminal board
+	fmt.Println(board)
 	fmt.Println(instructions)
-	fmt.Println(string(1))
 }
