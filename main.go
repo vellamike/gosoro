@@ -34,6 +34,13 @@ func (this Board) is_bidirectional(player, row, column int) bool {
 	return bidir
 }
 
+func (this Board) display() {
+	fmt.Println(reverse_array(this.player_2.positions[0]))
+	fmt.Println(reverse_array(this.player_2.positions[1]))
+	fmt.Println(this.player_1.positions[1])
+	fmt.Println(this.player_1.positions[0])
+}
+
 func random_position(num_seeds int) player {
 	var p player
 
@@ -100,10 +107,10 @@ func capture_possible(board Board, player_number, row, column int) bool {
 func perform_capture(board Board, player_number, row, column int) (Board, []Instruction) {
 	p, p_op := players_from_name(player_number, &board)
 	opponent_column := 7 - column
-	p_op.positions[0][opponent_column] = 0
-	p_op.positions[1][opponent_column] = 0
 	opponent_row_0_seeds := p_op.positions[0][opponent_column]
 	opponent_row_1_seeds := p_op.positions[1][opponent_column]
+	p_op.positions[0][opponent_column] = 0
+	p_op.positions[1][opponent_column] = 0
 	captured_seeds := opponent_row_0_seeds + opponent_row_1_seeds
 	p.positions[row][column] += captured_seeds
 
@@ -127,8 +134,8 @@ func execute_instruction(instruction Instruction, board Board, player_number int
 
 	// no while loops, just execute the instruction, including a capture, and return the board along with any next moves
 
-	fmt.Println("Performing a move")
-	num_seeds := p.positions[current_row][current_row]
+	num_seeds := p.positions[current_row][current_column]
+	fmt.Println("Number of seeds: ", num_seeds)
 	p.positions[current_row][current_column] = 0     // empty the starting pit
 	for i := 0; i < num_seeds; i++ { //move the seeds, currently not using direction
 		current_row, current_column = next_position(current_row, current_column, current_direction)
@@ -137,9 +144,19 @@ func execute_instruction(instruction Instruction, board Board, player_number int
 
 	// now for the capturing
 	if capture_possible(board, player_number, current_row, current_column) {
+		fmt.Println("About to performm a capture")
 		board, next_instructions = perform_capture(board, player_number, current_row, current_column)
 	}
 	return board, next_instructions
+}
+
+func reverse_array(arr [8]int) ([8]int){
+	num_elements := len(arr)
+	var reversed_array [8]int
+	for i := 0; i < num_elements; i++ {
+		reversed_array[i] = arr[num_elements - i -1]
+	}
+	return reversed_array
 }
 
 func all_moves(board Board, player_number int) (boards []Board, instructions [][]Instruction) {
@@ -149,12 +166,10 @@ func all_moves(board Board, player_number int) (boards []Board, instructions [][
 func main() {
 	fmt.Println("Instantiating a random board")
 	newboard := random_board(12)
-	fmt.Println(newboard)
-	new_instruction := Instruction{1, 2, "C"}
-	fmt.Println(new_instruction)
-	board, instructions := execute_instruction(new_instruction, newboard, 1)
-	fmt.Println(board)
-	fmt.Println(instructions)
-	// test the ability to execute an instruction
-	// TODO: write `all_moves`, which will provide an array with all instructions and corresponding final boards
+	newboard.display()
+	new_instruction := Instruction{1, 2, "A"}
+	fmt.Println("executing instruction:", new_instruction)
+	board, next_instruction := execute_instruction(new_instruction, newboard, 1)
+	board.display()
+	fmt.Println(next_instruction)
 }
