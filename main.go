@@ -28,6 +28,7 @@ type Instruction struct {
 	row       int
 	column    int
 	direction string
+	board     Board
 }
 
 func (this Board) is_bidirectional(row, column int) bool {
@@ -124,14 +125,15 @@ func perform_capture(board Board, player_number, row, column int) (Board, []Inst
 	var next_instructions []Instruction
 
 	if board.is_bidirectional(row, column) {
-		i1 := Instruction{row, column, "C"}
-		i2 := Instruction{row, column, "A"}
+		i1 := Instruction{row, column, "C", board}
+		i2 := Instruction{row, column, "A", board}
 		next_instructions = []Instruction{i1, i2}
 	}
 	return board, next_instructions
 }
 
-func execute_instruction(instruction Instruction, board Board, player_number int) (Board, []Instruction) {
+func execute_instruction(instruction Instruction, player_number int) (Board, []Instruction) {
+	board := instruction.board
 	p, _ := players_from_name(player_number, &board)
 	current_row := instruction.row
 	current_column := instruction.column
@@ -163,6 +165,13 @@ func reverse_array(arr [8]int) [8]int {
 	return reversed_array
 }
 
+func pop_instruction_stack(stack *[][]Instruction) []Instruction {
+	len_stack := len(*stack)
+	val := (*stack)[len_stack-1]
+	*stack = (*stack)[:len_stack-1]
+	return val
+}
+
 func all_moves(board Board, player_number int) (boards []Board, instructions [][]Instruction) {
 	// first find all rows and columns with more than two
 	p, _ := players_from_name(player_number, &board)
@@ -178,30 +187,46 @@ func all_moves(board Board, player_number int) (boards []Board, instructions [][
 
 	var initial_instructions []Instruction
 	for _, c := range coords {
-		instruction := Instruction{c.row, c.column, "A"}
+		instruction := Instruction{c.row, c.column, "A", board}
 		initial_instructions = append(initial_instructions, instruction)
 		if board.is_bidirectional(c.row, c.column) {
-			instruction = Instruction{c.row, c.column, "C"}
+			instruction = Instruction{c.row, c.column, "C", board}
 			initial_instructions = append(initial_instructions, instruction)
 		}
 	}
-	fmt.Println(initial_instructions)
 
-	// Now need to build a stack of instructions and corresponding boards, then consume from it.
-	// populating the boards and instructions slices as leaf nodes are reached
+	var instructions_stack [][]Instruction
 
-	// now start executing the instructions, adding new instructions to the stack
-
-	for _, instruc := range initial_instructions {
-		execute_instruction(instruc, board, player_number)
+	for _, i_instruction := range initial_instructions {
+		instructions_stack = append(instructions_stack, []Instruction{i_instruction})
 	}
-	return
+
+	for len(instructions_stack) > 0 {
+		instruction_set := (pop_instruction_stack(&instructions_stack))
+		instruction := instruction_set[len(instruction_set)-1]
+		b, i := execute_instruction(instruction, player_number)
+		if len(i) > 0 {
+			for _, ins := range i {
+				new_instruction_set := append(instruction_set, ins)
+				instructions_stack = append(instructions_stack, new_instruction_set)
+			}
+		} else {
+			boards = append(boards, b)
+			instructions = append(instructions, instruction_set)
+		}
+	}
+
+	return boards, instructions
 }
 
 func main() {
 	fmt.Println("Instantiating a random board")
 	newboard := random_board(16)
 	newboard.display()
-	fmt.Println("Instructions available:")
-	all_moves(newboard, 1)
+	boards, instruction_sets := all_moves(newboard, 1)
+	for i := range boards {
+		fmt.Println("Board ", i)
+		boards[i].display()
+		fmt.Println("num instructions: ", len(instruction_sets[i]))
+	}
 }
