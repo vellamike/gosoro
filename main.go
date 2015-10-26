@@ -254,9 +254,11 @@ func main() {
 	newboard := random_board(16)
 	newboard.display()
 	fmt.Println("Play now begins...")
-	board1, instructions := computer_move(newboard)
-	fmt.Println(instructions[0].row, instructions[0].column, instructions[0].direction)
+	for true {
+		board1, instructions := computer_move(newboard)
+		fmt.Println(instructions[0].row, instructions[0].column, instructions[0].direction)
 
-	newboard = execute_user_move(board1)
-	newboard.display()
+		newboard = execute_user_move(board1)
+		newboard.display()
+	}
 }
