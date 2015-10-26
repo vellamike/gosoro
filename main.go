@@ -7,6 +7,9 @@ package main
 
 import "fmt"
 import "math/rand"
+import "bufio"
+import "os"
+import "strconv"
 
 type player struct {
 	positions [2][8]int
@@ -219,17 +222,41 @@ func all_moves(board Board, player_number int) (boards []Board, instructions [][
 	return boards, instructions
 }
 
+func user_move() (row, column int, direction string) {
+	// Now let's try and get a move from the user
+	reader := bufio.NewReader(os.Stdin)
+	fmt.Print("Enter your move: ")
+	text, _ := reader.ReadString('\n')
+	t := string(text)
+	fmt.Println(t)
+	row, _ = strconv.Atoi(t[:1])
+	column, _ = strconv.Atoi(t[1:2])
+	direction = t[2:3]
+	return
+}
+
+func execute_user_move(board Board) Board {
+	row, column, direction := user_move()
+	instruction := Instruction{row, column, direction, board}
+	b, _ := execute_instruction(instruction, 2) // need to figure out what to do if user has a choice
+	return b
+}
+
+func computer_move(board Board) (Board, []Instruction) {
+	boards, instruction_sets := all_moves(board, 1)
+	fmt.Println("I, the computer, chose this move:")
+	boards[1].display()
+	return boards[1], instruction_sets[1]
+}
+
 func main() {
 	fmt.Println("Instantiating a random board")
 	newboard := random_board(16)
 	newboard.display()
-	boards, instruction_sets := all_moves(newboard, 1)
-	for i := range boards {
-		fmt.Println("Board ", i)
-		boards[i].display()
-		fmt.Println("num instructions: ", len(instruction_sets[i]))
-		for _, j := range instruction_sets[i] {
-			fmt.Println(j.row, j.column, j.direction)
-		}
-	}
+	fmt.Println("Play now begins...")
+	board1, instructions := computer_move(newboard)
+	fmt.Println(instructions[0].row, instructions[0].column, instructions[0].direction)
+
+	newboard = execute_user_move(board1)
+	newboard.display()
 }
