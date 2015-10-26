@@ -228,5 +228,8 @@ func main() {
 		fmt.Println("Board ", i)
 		boards[i].display()
 		fmt.Println("num instructions: ", len(instruction_sets[i]))
+		for _, j := range instruction_sets[i] {
+			fmt.Println(j.row, j.column, j.direction)
+		}
 	}
 }
