@@ -243,10 +243,11 @@ func execute_user_move(board Board) Board {
 }
 
 func computer_move(board Board) (Board, []Instruction) {
+	// Need to update so that the computer choses a move based on some optimality criterion
 	boards, instruction_sets := all_moves(board, 1)
 	fmt.Println("I, the computer, chose this move:")
-	boards[1].display()
-	return boards[1], instruction_sets[1]
+	boards[0].display()
+	return boards[0], instruction_sets[0]
 }
 
 func main() {
