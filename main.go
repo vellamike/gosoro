@@ -1,10 +1,8 @@
 package main
 
-// Thought on design:
-// Adding new instructions to the stack shouldn't just be something to do when a bidirectional node occurs
-// rather, once a move is completed the next instruction/s, if there are any, should be added to the stack
-// along with the mutated board
-
+// TO DO:
+// 1. When computer and user move, if they capture, they can move again
+// 2. Computer should pick a move based on some goal, not just randomly
 import "fmt"
 import "math/rand"
 import "bufio"
