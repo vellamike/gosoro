@@ -204,6 +204,7 @@ func all_moves(board Board, player_number int) (boards []Board, instructions [][
 
 	for len(instructions_stack) > 0 {
 		instruction_set := (pop_instruction_stack(&instructions_stack))
+
 		instruction := instruction_set[len(instruction_set)-1]
 		b, i := execute_instruction(instruction, player_number)
 		if len(i) > 0 {
@@ -240,12 +241,35 @@ func execute_user_move(board Board) Board {
 	return b
 }
 
+func score(board Board) (int){
+	//returns the score
+	positions := board.player_1.positions
+	total := 0
+	for _,p := range positions{
+		for _,i := range p{
+			total += i
+		}
+	}
+	return total
+}
+
+
 func computer_move(board Board) (Board, []Instruction) {
 	// Need to update so that the computer choses a move based on some optimality criterion
 	boards, instruction_sets := all_moves(board, 1)
+	max_index := 0
+	current_best_score := 0
+	for board_index, b := range boards{
+		s := score(b)
+		if s > current_best_score{
+			current_best_score = s
+			max_index = board_index
+		}
+	}
+
 	fmt.Println("I, the computer, chose this move:")
-	boards[0].display()
-	return boards[0], instruction_sets[0]
+	boards[max_index].display()
+	return boards[max_index], instruction_sets[max_index]
 }
 
 func main() {
