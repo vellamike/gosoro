@@ -1,6 +1,17 @@
 # gosoro
 Igisoro AI, implemented in GO
 
+# Further thoughts on the game:
+
+The AI is currently very board-centric, that is to say it evaluates moves based on the resultant board.
+In actual fact the instruction or move is the central concept, a game should be seen as a sequence of moves
+not board states. A move can either be a parent move (other moves must follow from it) or a leaf move.
+The AI can then find the path through the move tree which terminates in the best leaf move.
+A leaf move can either be one which leads to a capture, forcing another move, or one which
+causes automatic victory. A leaf move can also be evaluated in a minimax-style manner by
+evaluating what leaf moves the oponent may play based on the eventual board
+associated with the computer's leaf move.
+
 # Notes
 
  Initial rules: No reversing, only victory is if other player can't move
