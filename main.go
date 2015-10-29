@@ -250,13 +250,15 @@ func all_moves(board Board, player_number int) (boards []Board, instructions [][
 	return boards, instructions // return the boards and full corresponding instruction sets
 }
 
-func user_move() (row, column int, direction string) {
+func user_move() ([]Instruction) (row, column int, direction string) { // returns a slice of instructions
 	// Now let's try and get a move from the user
+	// TODO: Allow capture commands
 	reader := bufio.NewReader(os.Stdin)
 	fmt.Print("Enter your move: ")
 	text, _ := reader.ReadString('\n')
 	t := string(text)
 	fmt.Println(t)
+	fmt.Println(len(t))
 	row, _ = strconv.Atoi(t[:1])
 	column, _ = strconv.Atoi(t[1:2])
 	direction = t[2:3]
