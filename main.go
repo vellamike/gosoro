@@ -148,8 +148,8 @@ func perform_capture(board Board, player_number, row, column int) (Board, []Inst
 		i2 := Instruction{row, column, "C", board}
 		next_instructions = append(next_instructions, i2)
 	}
-	fmt.Println("Capture has been evaluated, the following instructions are being returned:")
-	fmt.Println(next_instructions)
+	//fmt.Println("Capture has been evaluated, the following instructions are being returned:")
+	//fmt.Println(next_instructions)
 	return board, next_instructions
 }
 
@@ -295,20 +295,31 @@ func computer_move(board Board) (Board, []Instruction) {
 		}
 	}
 
-	fmt.Println("I, the computer, chose this move:")
+	fmt.Println("I, the computer, chose the moves which finally evaluate to:")
 	boards[max_index].display()
+	for _, instruc := range instruction_sets[max_index] {
+		fmt.Println(instruc.row, instruc.column, instruc.direction)
+		instruc.board.display()
+		fmt.Println("---")
+	}
 	return boards[max_index], instruction_sets[max_index] // return final board and corresponding instruction sets
 }
 
 func main() {
 	fmt.Println("Instantiating a random board")
-	newboard := random_board(16)
+	newboard := random_board(32)
 	newboard.display()
 	fmt.Println("Play now begins...")
 	for true {
 		board1, instructions := computer_move(newboard)
+		fmt.Println("Final board:")
+		board1.display()
 		fmt.Println(instructions)
 		newboard = execute_user_move(board1)
 		newboard.display()
 	}
+
+	//	fmt.Println(next_position(1,1,"A"))
+	//	fmt.Println(next_position(1,0,"A"))
+	//	fmt.Println(next_position(0,0,"A"))
 }
