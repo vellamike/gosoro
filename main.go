@@ -250,7 +250,7 @@ func all_moves(board Board, player_number int) (boards []Board, instructions [][
 	return boards, instructions // return the boards and full corresponding instruction sets
 }
 
-func user_move() ([]Instruction) (row, column int, direction string) { // returns a slice of instructions
+func user_move() (rows, columns []int, directions []string) { // returns a slice of instructions
 	// Now let's try and get a move from the user
 	// TODO: Allow capture commands
 	reader := bufio.NewReader(os.Stdin)
@@ -259,17 +259,31 @@ func user_move() ([]Instruction) (row, column int, direction string) { // return
 	t := string(text)
 	fmt.Println(t)
 	fmt.Println(len(t))
-	row, _ = strconv.Atoi(t[:1])
-	column, _ = strconv.Atoi(t[1:2])
-	direction = t[2:3]
+	for i := 1; i< len(t) / 3 + 1; i++{
+
+		fmt.Println("In loop ", i)
+		row ,_ := strconv.Atoi(t[i * 3 - 3: i * 3 - 2])
+		fmt.Println("row:", row)
+		column ,_ := strconv.Atoi(t[i * 3 - 2 : i * 3 - 1])
+		fmt.Println("col:", column)
+		direction := t[i * 3 - 1 : i * 3]
+		fmt.Println("direction", direction)
+		rows = append(rows, row)
+		columns = append(columns, column)
+		directions = append(directions, direction)
+	}
 	return
 }
 
 func execute_user_move(board Board) Board {
 	row, column, direction := user_move()
-	instruction := Instruction{row, column, direction, board}
-	b, _ := execute_instruction(instruction, 2) // need to figure out what to do if user has a choice
-	return b
+
+	for i := range row {
+		instruction := Instruction{row[i], column[i], direction[i], board}
+		board, _ = execute_instruction(instruction, 2) // need to figure out what to do if user has a choice
+	}
+
+	return board
 }
 
 func score(board Board) int {
@@ -320,7 +334,7 @@ func main() {
 		newboard = execute_user_move(board1)
 		newboard.display()
 	}
-
+	//      17A14A is a good move
 	//	fmt.Println(next_position(1,1,"A"))
 	//	fmt.Println(next_position(1,0,"A"))
 	//	fmt.Println(next_position(0,0,"A"))
