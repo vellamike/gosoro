@@ -17,6 +17,7 @@ import "math/rand"
 import "bufio"
 import "os"
 import "strconv"
+import "time"
 
 type player struct {
 	//Represents a player's territory in their frame of reference
@@ -322,6 +323,7 @@ func computer_move(board Board) (Board, []Instruction) {
 }
 
 func main() {
+	rand.Seed( time.Now().UTC().UnixNano())
 	fmt.Println("Instantiating a random board")
 	newboard := random_board(32)
 	newboard.display()
