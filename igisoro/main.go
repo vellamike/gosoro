@@ -18,22 +18,18 @@ import "bufio"
 import "os"
 import "strconv"
 import "time"
-
-type player struct {
-	//Represents a player's territory in their frame of reference
-	positions [2][8]int
-}
+import "gosoro/ds"
 
 type coord struct {
 	row    int
 	column int
 	board  *Board
-	player *player
+	player *ds.Player
 }
 
 type Board struct {
-	player_1 player
-	player_2 player
+	player_1 ds.Player
+	player_2 ds.Player
 }
 
 type Instruction struct {
@@ -56,20 +52,20 @@ func (this Board) is_bidirectional(row, column int) bool {
 
 func (this Board) display() {
 	//Display the board to the screen from the computer's perspective
-	fmt.Println(reverse_array(this.player_2.positions[0]))
-	fmt.Println(reverse_array(this.player_2.positions[1]))
-	fmt.Println(this.player_1.positions[1])
-	fmt.Println(this.player_1.positions[0])
+	fmt.Println(reverse_array(this.player_2.Positions[0]))
+	fmt.Println(reverse_array(this.player_2.Positions[1]))
+	fmt.Println(this.player_1.Positions[1])
+	fmt.Println(this.player_1.Positions[0])
 }
 
-func random_position(num_seeds int) player {
+func random_position(num_seeds int) ds.Player {
 	//choose a random pit
-	var p player
+	var p ds.Player
 
 	for i := 0; i < num_seeds; i++ {
 		row := rand.Intn(2)
 		column := rand.Intn(8)
-		p.positions[row][column] += 1
+		p.Positions[row][column] += 1
 	}
 
 	return p
@@ -109,7 +105,7 @@ func next_position(current_row, current_column int, direction string) (int, int)
 	return current_row, current_column
 }
 
-func players_from_name(player_number int, board *Board) (p, p_op *player) {
+func players_from_name(player_number int, board *Board) (p, p_op *ds.Player) {
 	//Retrun a player based on their identifier
 	if player_number == 1 {
 		p = &board.player_1
@@ -125,20 +121,20 @@ func capture_possible(board Board, player_number, row, column int) bool {
 	//Returns whether landing in this pit would result in capturing oponent's seeds
 	_, p_op := players_from_name(player_number, &board)
 	opponent_column := 7 - column
-	opponent_row_0_seeds := p_op.positions[0][opponent_column]
-	opponent_row_1_seeds := p_op.positions[1][opponent_column]
+	opponent_row_0_seeds := p_op.Positions[0][opponent_column]
+	opponent_row_1_seeds := p_op.Positions[1][opponent_column]
 	return (opponent_row_0_seeds != 0 && opponent_row_1_seeds != 0 && row == 1)
 }
 
 func perform_capture(board Board, player_number, row, column int) (Board, []Instruction) {
 	p, p_op := players_from_name(player_number, &board)
 	opponent_column := 7 - column
-	opponent_row_0_seeds := p_op.positions[0][opponent_column]
-	opponent_row_1_seeds := p_op.positions[1][opponent_column]
-	p_op.positions[0][opponent_column] = 0
-	p_op.positions[1][opponent_column] = 0
+	opponent_row_0_seeds := p_op.Positions[0][opponent_column]
+	opponent_row_1_seeds := p_op.Positions[1][opponent_column]
+	p_op.Positions[0][opponent_column] = 0
+	p_op.Positions[1][opponent_column] = 0
 	captured_seeds := opponent_row_0_seeds + opponent_row_1_seeds
-	p.positions[row][column] += captured_seeds
+	p.Positions[row][column] += captured_seeds
 
 	var next_instructions []Instruction
 
@@ -175,11 +171,11 @@ func execute_instruction(instruction Instruction, player_number int) (Board, []I
 	current_direction := instruction.direction
 	var next_instructions []Instruction
 
-	num_seeds := p.positions[current_row][current_column] //How many seeds will be moved
-	p.positions[current_row][current_column] = 0          // empty the starting pit
+	num_seeds := p.Positions[current_row][current_column] //How many seeds will be moved
+	p.Positions[current_row][current_column] = 0          // empty the starting pit
 	for i := 0; i < num_seeds; i++ {                      //move the seeds
 		current_row, current_column = next_position(current_row, current_column, current_direction)
-		p.positions[current_row][current_column] += 1
+		p.Positions[current_row][current_column] += 1
 	}
 
 	// now for the capturing
@@ -203,7 +199,7 @@ func all_moves(board Board, player_number int) (boards []Board, instructions [][
 	// first find all rows and columns with more than two
 	p, _ := players_from_name(player_number, &board)
 	var coords []coord
-	for row_index, row := range p.positions {
+	for row_index, row := range p.Positions {
 		for column_index, num_seeds := range row {
 			if num_seeds > 1 {
 				coord := coord{row_index, column_index, &board, p}
@@ -289,7 +285,7 @@ func execute_user_move(board Board) Board {
 
 func score(board Board) int {
 	//returns the score
-	positions := board.player_1.positions
+	positions := board.player_1.Positions
 	total := 0
 	for _, p := range positions {
 		for _, i := range p {
