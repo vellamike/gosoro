@@ -20,44 +20,6 @@ import "strconv"
 import "time"
 import "gosoro/ds"
 
-type coord struct {
-	row    int
-	column int
-	board  *Board
-	player *ds.Player
-}
-
-type Board struct {
-	player_1 ds.Player
-	player_2 ds.Player
-}
-
-type Instruction struct {
-	row       int
-	column    int
-	direction string
-	board     Board
-}
-
-func (this Board) is_bidirectional(row, column int) bool {
-	//Whether clockwise and counterclockwise moves are allowed from this position
-	var bidir bool
-	if column == 0 || column == 1 || column == 6 || column == 7 {
-		bidir = true
-	} else {
-		bidir = false
-	}
-	return bidir
-}
-
-func (this Board) display() {
-	//Display the board to the screen from the computer's perspective
-	fmt.Println(reverse_array(this.player_2.Positions[0]))
-	fmt.Println(reverse_array(this.player_2.Positions[1]))
-	fmt.Println(this.player_1.Positions[1])
-	fmt.Println(this.player_1.Positions[0])
-}
-
 func random_position(num_seeds int) ds.Player {
 	//choose a random pit
 	var p ds.Player
@@ -72,9 +34,9 @@ func random_position(num_seeds int) ds.Player {
 
 }
 
-func random_board(num_seeds int) Board {
+func random_board(num_seeds int) ds.Board {
 	//Initialize a random board
-	var newboard Board
+	var newboard ds.Board
 
 	newboard.player_1 = random_position(num_seeds)
 	newboard.player_2 = random_position(num_seeds)
@@ -105,7 +67,7 @@ func next_position(current_row, current_column int, direction string) (int, int)
 	return current_row, current_column
 }
 
-func players_from_name(player_number int, board *Board) (p, p_op *ds.Player) {
+func players_from_name(player_number int, board *ds.Board) (p, p_op *ds.Player) {
 	//Retrun a player based on their identifier
 	if player_number == 1 {
 		p = &board.player_1
@@ -117,7 +79,7 @@ func players_from_name(player_number int, board *Board) (p, p_op *ds.Player) {
 	return p, p_op
 }
 
-func capture_possible(board Board, player_number, row, column int) bool {
+func capture_possible(board ds.Board, player_number, row, column int) bool {
 	//Returns whether landing in this pit would result in capturing oponent's seeds
 	_, p_op := players_from_name(player_number, &board)
 	opponent_column := 7 - column
@@ -126,7 +88,7 @@ func capture_possible(board Board, player_number, row, column int) bool {
 	return (opponent_row_0_seeds != 0 && opponent_row_1_seeds != 0 && row == 1)
 }
 
-func perform_capture(board Board, player_number, row, column int) (Board, []Instruction) {
+func perform_capture(board ds.Board, player_number, row, column int) (ds.Board, []Instruction) {
 	p, p_op := players_from_name(player_number, &board)
 	opponent_column := 7 - column
 	opponent_row_0_seeds := p_op.Positions[0][opponent_column]
@@ -138,11 +100,11 @@ func perform_capture(board Board, player_number, row, column int) (Board, []Inst
 
 	var next_instructions []Instruction
 
-	i1 := Instruction{row, column, "A", board}
+	i1 := ds.Instruction{row, column, "A", board}
 	next_instructions = []Instruction{i1}
 
 	if board.is_bidirectional(row, column) {
-		i2 := Instruction{row, column, "C", board}
+		i2 := ds.Instruction{row, column, "C", board}
 		next_instructions = append(next_instructions, i2)
 	}
 	//fmt.Println("Capture has been evaluated, the following instructions are being returned:")
@@ -150,17 +112,9 @@ func perform_capture(board Board, player_number, row, column int) (Board, []Inst
 	return board, next_instructions
 }
 
-func reverse_array(arr [8]int) [8]int {
-	//Return the reverse of a size-8 array, handy for visualisation
-	num_elements := len(arr)
-	var reversed_array [8]int
-	for i := 0; i < num_elements; i++ {
-		reversed_array[i] = arr[num_elements-i-1]
-	}
-	return reversed_array
-}
 
-func execute_instruction(instruction Instruction, player_number int) (Board, []Instruction) {
+
+func execute_instruction(instruction ds.Instruction, player_number int) (ds.Board, []Instruction) {
 	// Execute the instruction (no decison on whether it is legal or not) and return
 	// Possible following instructions if there are any. Following instructions
 	// Result from captures
@@ -195,15 +149,15 @@ func pop_instruction_stack(stack *[][]Instruction) []Instruction {
 	return val
 }
 
-func all_moves(board Board, player_number int) (boards []Board, instructions [][]Instruction) {
+func all_moves(board ds.Board, player_number int) (boards []Board, instructions [][]Instruction) {
 	// first find all rows and columns with more than two
 	p, _ := players_from_name(player_number, &board)
-	var coords []coord
+	var coords []ds.Coord
 	for row_index, row := range p.Positions {
 		for column_index, num_seeds := range row {
 			if num_seeds > 1 {
-				coord := coord{row_index, column_index, &board, p}
-				coords = append(coords, coord)
+				coord := ds.Coord{row_index, column_index, &board, p}
+				coords = append(coords, ds.Coord)
 			}
 		}
 	}
@@ -213,11 +167,11 @@ func all_moves(board Board, player_number int) (boards []Board, instructions [][
 	}
 
 	var initial_instructions []Instruction // list of all initial instructions, not yet popualting the stack
-	for _, c := range coords {
-		instruction := Instruction{c.row, c.column, "A", board}          // Perform the counterclockwise move
+	for _, c := range ds.Coords {
+		instruction := ds.Instruction{c.row, c.column, "A", board}          // Perform the counterclockwise move
 		initial_instructions = append(initial_instructions, instruction) // Append instruction to initial instruction list
 		if board.is_bidirectional(c.row, c.column) {                     // If we can move counterclockwise from this position
-			instruction = Instruction{c.row, c.column, "C", board}
+			instruction = ds.Instruction{c.row, c.column, "C", board}
 			initial_instructions = append(initial_instructions, instruction)
 		}
 	}
@@ -272,18 +226,18 @@ func user_move() (rows, columns []int, directions []string) { // returns a slice
 	return
 }
 
-func execute_user_move(board Board) Board {
+func execute_user_move(board ds.Board) ds.Board {
 	row, column, direction := user_move()
 
 	for i := range row {
-		instruction := Instruction{row[i], column[i], direction[i], board}
+		instruction := ds.Instruction{row[i], column[i], direction[i], board}
 		board, _ = execute_instruction(instruction, 2) // need to figure out what to do if user has a choice
 	}
 
 	return board
 }
 
-func score(board Board) int {
+func score(board ds.Board) int {
 	//returns the score
 	positions := board.player_1.Positions
 	total := 0
@@ -295,7 +249,7 @@ func score(board Board) int {
 	return total
 }
 
-func computer_move(board Board) (Board, []Instruction) {
+func computer_move(board ds.Board) (ds.Board, []Instruction) {
 	// Need to update so that the computer choses a move based on some optimality criterion
 	boards, instruction_sets := all_moves(board, 1)
 	max_index := 0
