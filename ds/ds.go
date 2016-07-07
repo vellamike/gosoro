@@ -8,22 +8,22 @@ type Player struct {
 }
 
 type Coord struct {
-	row    int
-	column int
-	board  *Board
-	player *Player
+	Row    int
+	Column int
+	Board  *Board
+	Player *Player
 }
 
 type Board struct {
-	player_1 Player
-	player_2 Player
+	Player_1 Player
+	Player_2 Player
 }
 
 type Instruction struct {
-	row       int
-	column    int
-	direction string
-	board     Board
+	Row       int
+	Column    int
+	Direction string
+	Board     Board
 }
 
 func reverse_array(arr [8]int) [8]int {
@@ -36,7 +36,7 @@ func reverse_array(arr [8]int) [8]int {
 	return reversed_array
 }
 
-func (this Board) is_bidirectional(row, column int) bool {
+func (this Board) Is_bidirectional(row, column int) bool {
 	//Whether clockwise and counterclockwise moves are allowed from this position
 	var bidir bool
 	if column == 0 || column == 1 || column == 6 || column == 7 {
@@ -47,10 +47,10 @@ func (this Board) is_bidirectional(row, column int) bool {
 	return bidir
 }
 
-func (this Board) display() {
+func (this Board) Display() {
 	//Display the board to the screen from the computer's perspective
-	fmt.Println(reverse_array(this.player_2.Positions[0]))
-	fmt.Println(reverse_array(this.player_2.Positions[1]))
-	fmt.Println(this.player_1.Positions[1])
-	fmt.Println(this.player_1.Positions[0])
+	fmt.Println(reverse_array(this.Player_2.Positions[0]))
+	fmt.Println(reverse_array(this.Player_2.Positions[1]))
+	fmt.Println(this.Player_1.Positions[1])
+	fmt.Println(this.Player_1.Positions[0])
 }
