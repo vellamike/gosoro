@@ -87,8 +87,6 @@ func perform_capture(board ds.Board, player_number, row, column int) (ds.Board, 
 	return board, next_instructions
 }
 
-
-
 func execute_instruction(instruction ds.Instruction, player_number int) (ds.Board, []ds.Instruction) {
 	// Execute the instruction (no decison on whether it is legal or not) and return
 	// Possible following instructions if there are any. Following instructions
@@ -143,7 +141,7 @@ func all_moves(board ds.Board, player_number int) (boards []ds.Board, instructio
 
 	var initial_instructions []ds.Instruction // list of all initial instructions, not yet popualting the stack
 	for _, c := range coords {
-		instruction := ds.Instruction{c.Row, c.Column, "A", board}          // Perform the counterclockwise move
+		instruction := ds.Instruction{c.Row, c.Column, "A", board}       // Perform the counterclockwise move
 		initial_instructions = append(initial_instructions, instruction) // Append instruction to initial instruction list
 		if board.Is_bidirectional(c.Row, c.Column) {                     // If we can move counterclockwise from this position
 			instruction = ds.Instruction{c.Row, c.Column, "C", board}
@@ -185,14 +183,14 @@ func user_move() (rows, columns []int, directions []string) { // returns a slice
 	t := string(text)
 	fmt.Println(t)
 	fmt.Println(len(t))
-	for i := 1; i< len(t) / 3 + 1; i++{
+	for i := 1; i < len(t)/3+1; i++ {
 
 		fmt.Println("In loop ", i)
-		row ,_ := strconv.Atoi(t[i * 3 - 3: i * 3 - 2])
+		row, _ := strconv.Atoi(t[i*3-3 : i*3-2])
 		fmt.Println("row:", row)
-		column ,_ := strconv.Atoi(t[i * 3 - 2 : i * 3 - 1])
+		column, _ := strconv.Atoi(t[i*3-2 : i*3-1])
 		fmt.Println("col:", column)
-		direction := t[i * 3 - 1 : i * 3]
+		direction := t[i*3-1 : i*3]
 		fmt.Println("direction", direction)
 		rows = append(rows, row)
 		columns = append(columns, column)
@@ -260,8 +258,4 @@ func main() {
 		newboard = execute_user_move(board1)
 		newboard.Display()
 	}
-	//      17A14A is a good move
-	//	fmt.Println(next_position(1,1,"A"))
-	//	fmt.Println(next_position(1,0,"A"))
-	//	fmt.Println(next_position(0,0,"A"))
 }
