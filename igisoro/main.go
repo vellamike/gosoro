@@ -13,36 +13,11 @@ package main
 // this would be a much more safe and OO approach.
 
 import "fmt"
-import "math/rand"
 import "bufio"
 import "os"
 import "strconv"
-import "time"
 import "gosoro/ds"
-
-func random_position(num_seeds int) ds.Player {
-	//choose a random pit
-	var p ds.Player
-
-	for i := 0; i < num_seeds; i++ {
-		row := rand.Intn(2)
-		column := rand.Intn(8)
-		p.Positions[row][column] += 1
-	}
-
-	return p
-
-}
-
-func random_board(num_seeds int) ds.Board {
-	//Initialize a random board
-	var newboard ds.Board
-
-	newboard.Player_1 = random_position(num_seeds)
-	newboard.Player_2 = random_position(num_seeds)
-
-	return newboard
-}
+import "gosoro/utils"
 
 func next_position(current_row, current_column int, direction string) (int, int) {
 	//Based on the current position and direction, identify the next position
@@ -273,9 +248,8 @@ func computer_move(board ds.Board) (ds.Board, []ds.Instruction) {
 }
 
 func main() {
-	rand.Seed( time.Now().UTC().UnixNano())
 	fmt.Println("Instantiating a random board")
-	newboard := random_board(32)
+	newboard := utils.Random_board(32)
 	newboard.Display()
 	fmt.Println("Play now begins...")
 	for true {
