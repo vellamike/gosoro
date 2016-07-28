@@ -12,22 +12,27 @@ package main
 // idea: perhaps each instruction should contain the initial board, instruction, and final board
 // this would be a much more safe and OO approach.
 
-
 // New architecture:
 
 // Now that I'm a bit more confident with go, I'd like to set up the application with the following objects:
 // 1. A board - this is a data structure that we basically already have. It may also contain information such as which player is to play next, in the middle of a play, or whether any positions are 'hot'
-// 2. An instruction - When applied to a board this produces a new board. Instruction is a string of characters (same format which the user uses)
+// 2. An instruction - When applied to a board this produces a new board. Instruction is a string of characters (same format which the user uses). The board does not "decide" whether a move was valid or not
 // 3. A Mutator - this takes a board and returns all the possible instruction objects. The mutator is specific to the game.
 // 4. An AI - given a minimum of a board on which its turn is due and a mutator the player will decide what move it wants to play to improve its position. In the first instance it will most likely use minimax.
-// 5. A game controller - this is responsible for receiving user input, handing the board between the AI and opponent
+// 5. A game controller - this is responsible for receiving user input, handing the board between the AI and opponent. The mutator is instantiated with the following:
+//    1. Board originator
+//    2. AI
+//    3. Mutator
 
 import "fmt"
 import "bufio"
 import "os"
 import "strconv"
 import "gosoro/ds"
-import "gosoro/utils"
+import "gosoro/boardgenerators"
+import "gosoro/mutators"
+import "gosoro/gamecontrollers"
+import "gosoro/ai"
 
 func next_position(current_row, current_column int, direction string) (int, int) {
 	//Based on the current position and direction, identify the next position
@@ -256,16 +261,43 @@ func computer_move(board ds.Board) (ds.Board, []ds.Instruction) {
 }
 
 func main() {
-	fmt.Println("Instantiating a random board")
-	newboard := utils.Random_board(32)
-	newboard.Display()
-	fmt.Println("Play now begins...")
-	for true {
-		board1, instructions := computer_move(newboard)
-		fmt.Println("Final board:")
-		board1.Display()
-		fmt.Println(instructions)
-		newboard = execute_user_move(board1)
-		newboard.Display()
-	}
+
+	//	fmt.Println("Instantiating a random board")
+	//	newboard := utils.Random_board(32)
+	//	newboard.Display()
+	//	fmt.Println("Play now begins...")
+	//	for true {
+	//		board1, instructions := computer_move(newboard)
+	//		fmt.Println("Final board:")
+	//		board1.Display()
+	//		fmt.Println(instructions)
+	//		newboard = execute_user_move(board1)
+	//		newboard.Display()
+	//	}
+
+	// first get a new board generator
+
+	// for this iteration I would first like to compose the game controller and display the board it starts out with
+
+	board_generator := boardgenerators.Randomboard
+
+	// then a new mutator
+
+	mutator := mutators.Mutator{}
+
+	// then a new AI
+
+	ai := ai.AI{}
+
+	// finally get a game controller and put all those things in it
+
+	controller := gamecontrollers.NewGameController(board_generator, ai, mutator)
+
+	// first display the board
+	controller.DisplayBoard()
+
+	// TO DO NEXT: The controller asks the user for an input move and plays it.
+	// An instruction is instantiated from the user string which is passed to the board
+	// to mutate it.
+
 }

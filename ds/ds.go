@@ -2,6 +2,10 @@ package ds
 
 import "fmt"
 
+type BoardInterface interface {
+	Display()
+}
+
 type Player struct {
 	//Represents a player's territory in their frame of reference
 	Positions [2][8]int
