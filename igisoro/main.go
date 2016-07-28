@@ -12,6 +12,16 @@ package main
 // idea: perhaps each instruction should contain the initial board, instruction, and final board
 // this would be a much more safe and OO approach.
 
+
+// New architecture:
+
+// Now that I'm a bit more confident with go, I'd like to set up the application with the following objects:
+// 1. A board - this is a data structure that we basically already have. It may also contain information such as which player is to play next, in the middle of a play, or whether any positions are 'hot'
+// 2. An instruction - When applied to a board this produces a new board. Instruction is a string of characters (same format which the user uses)
+// 3. A Mutator - this takes a board and returns all the possible instruction objects. The mutator is specific to the game.
+// 4. An AI - given a minimum of a board on which its turn is due and a mutator the player will decide what move it wants to play to improve its position. In the first instance it will most likely use minimax.
+// 5. A game controller - this is responsible for receiving user input, handing the board between the AI and opponent
+
 import "fmt"
 import "bufio"
 import "os"
