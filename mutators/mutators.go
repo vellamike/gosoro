@@ -1,12 +1,10 @@
 package mutators
 
 import "gosoro/ds"
-//import "fmt"
-
+import "fmt"
 
 type Mutator struct {
 }
-
 
 func pop_instruction_stack(stack *[][]ds.Instruction) []ds.Instruction {
 	// An instruction stack is slice of slices of instructions.
@@ -18,7 +16,10 @@ func pop_instruction_stack(stack *[][]ds.Instruction) []ds.Instruction {
 	return val
 }
 
-
+func (Mutator) ExecuteMove(board ds.BoardInterface, move ds.Move) ds.BoardInterface {
+	fmt.Println("Warning - this method is currently not changing the board")
+	return board
+}
 
 // This method needs rethinking because it relies on the ExecuteInstruction method
 //func all_moves(board ds.Board, player_number int) (boards []ds.Board, instructions [][]ds.Instruction) {

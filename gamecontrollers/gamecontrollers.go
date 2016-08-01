@@ -82,16 +82,19 @@ func perform_capture(board ds.Board, player_number, row, column int) (ds.Board, 
 	return board, next_instructions
 }
 
-
-func user_move() (rows, columns []int, directions []string) { // returns a slice of instructions
-	// Now let's try and get a move from the user
-	// TODO: Allow capture commands
+func user_move() []ds.Move { // Takes user input as a string and returns a slice of Moves
 	reader := bufio.NewReader(os.Stdin)
 	fmt.Print("Enter your move: ")
 	text, _ := reader.ReadString('\n')
 	t := string(text)
 	fmt.Println(t)
 	fmt.Println(len(t))
+
+	var rows, columns []int
+	var directions []string
+
+	var moves []ds.Move
+
 	for i := 1; i < len(t)/3+1; i++ {
 
 		fmt.Println("In loop ", i)
@@ -104,16 +107,29 @@ func user_move() (rows, columns []int, directions []string) { // returns a slice
 		rows = append(rows, row)
 		columns = append(columns, column)
 		directions = append(directions, direction)
+
+		moves = append(moves, ds.Move{row, column, direction})
+
 	}
-	return
+	return moves
 }
 
 func (gc gamecontroller) UserMove() {
 	// Ask the user for a move, create an instruction from his reply, apply it to the board
-	row, column, direction := user_move()
-	fmt.Println(row)
-	fmt.Println(column)
-	fmt.Println(direction)
 
-	// TO DO NEXT: create an Instruction object from the user input and apply it to the board
+	moves := user_move()
+	fmt.Println("User's moves:")
+	fmt.Println(moves)
+
+	fmt.Println("Board before user move is executed:")
+	fmt.Println(gc.board)
+	for _, move := range moves {
+		gc.board = gc.mutator.ExecuteMove(gc.board, move)
+	}
+	fmt.Println("Board after user move is executed:")
+	fmt.Println(gc.board)
+
+	// TODO: once the above is complete, need a method to get all possible moves for the
+	// computer. This will involve certain things like the board's ability to remember the last move,
+	// or it is possible that this logic should live in the mutator.
 }

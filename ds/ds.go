@@ -30,6 +30,12 @@ type Instruction struct {
 	Board     Board
 }
 
+type Move struct {
+	Row       int
+	Column    int
+	Direction string
+}
+
 func reverse_array(arr [8]int) [8]int {
 	//Return the reverse of a size-8 array, handy for visualisation
 	num_elements := len(arr)
@@ -59,7 +65,6 @@ func (this Board) Display() {
 	fmt.Println(this.Player_1.Positions[0])
 }
 
-
 func PlayersFromName(player_number int, board *Board) (p, p_op *Player) {
 	//Retrun a player based on their identifier
 	if player_number == 1 {
@@ -71,31 +76,3 @@ func PlayersFromName(player_number int, board *Board) (p, p_op *Player) {
 	}
 	return p, p_op
 }
-
-
-// Execute instruction method probably needs to be rethought
-
-//func ExecuteInstruction(instruction Instruction, player_number int) (Board, []Instruction) {
-//	// Execute the instruction (no decison on whether it is legal or not) and return
-//	// Possible following instructions if there are any. Following instructions
-//	// Result from captures
-//	board := instruction.Board
-//	p, _ := PlayersFromName(player_number, &board)
-//	current_row := instruction.Row
-//	current_column := instruction.Column
-//	current_direction := instruction.Direction
-//	var next_instructions []Instruction
-//
-//	num_seeds := p.Positions[current_row][current_column] //How many seeds will be moved
-//	p.Positions[current_row][current_column] = 0          // empty the starting pit
-//	for i := 0; i < num_seeds; i++ {                      //move the seeds
-//		current_row, current_column = next_position(current_row, current_column, current_direction)
-//		p.Positions[current_row][current_column] += 1
-//	}
-//
-//	// now for the capturing
-//	if capture_possible(board, player_number, current_row, current_column) {
-//		board, next_instructions = perform_capture(board, player_number, current_row, current_column)
-//	}
-//	return board, next_instructions
-//}
