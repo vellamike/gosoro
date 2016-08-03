@@ -10,7 +10,7 @@ import "os"
 import "strconv"
 
 type gamecontroller struct {
-	board   ds.BoardInterface
+	board   ds.Board
 	ai      ai.AI
 	mutator mutators.Mutator
 }
@@ -24,29 +24,6 @@ func NewGameController(generator func() ds.Board, ai ai.AI, mutator mutators.Mut
 
 func (gc gamecontroller) DisplayBoard() {
 	gc.board.Display()
-}
-
-func next_position(current_row, current_column int, direction string) (int, int) {
-	//Based on the current position and direction, identify the next position
-	switch {
-	case current_row == 0 && current_column < 7 && direction == "A":
-		current_column += 1
-	case current_row == 0 && current_column == 7 && direction == "A":
-		current_row = 1
-	case current_row == 1 && current_column > 0 && direction == "A":
-		current_column -= 1
-	case current_row == 1 && current_column == 0 && direction == "A":
-		current_row = 0
-	case current_row == 0 && current_column > 0 && direction == "C": // move left on bottom row
-		current_column -= 1
-	case current_row == 0 && current_column == 0 && direction == "C": // move up to top row
-		current_row = 1
-	case current_row == 1 && current_column < 7 && direction == "C": // move right on top row
-		current_column += 1
-	case current_row == 1 && current_column == 7 && direction == "C": // move down to bottom row
-		current_row = 0
-	}
-	return current_row, current_column
 }
 
 func capture_possible(board ds.Board, player_number, row, column int) bool {
@@ -87,8 +64,6 @@ func user_move() []ds.Move { // Takes user input as a string and returns a slice
 	fmt.Print("Enter your move: ")
 	text, _ := reader.ReadString('\n')
 	t := string(text)
-	fmt.Println(t)
-	fmt.Println(len(t))
 
 	var rows, columns []int
 	var directions []string
@@ -96,14 +71,9 @@ func user_move() []ds.Move { // Takes user input as a string and returns a slice
 	var moves []ds.Move
 
 	for i := 1; i < len(t)/3+1; i++ {
-
-		fmt.Println("In loop ", i)
 		row, _ := strconv.Atoi(t[i*3-3 : i*3-2])
-		fmt.Println("row:", row)
 		column, _ := strconv.Atoi(t[i*3-2 : i*3-1])
-		fmt.Println("col:", column)
 		direction := t[i*3-1 : i*3]
-		fmt.Println("direction", direction)
 		rows = append(rows, row)
 		columns = append(columns, column)
 		directions = append(directions, direction)
@@ -122,12 +92,12 @@ func (gc gamecontroller) UserMove() {
 	fmt.Println(moves)
 
 	fmt.Println("Board before user move is executed:")
-	fmt.Println(gc.board)
+	gc.board.Display()
 	for _, move := range moves {
-		gc.board = gc.mutator.ExecuteMove(gc.board, move)
+		gc.board = gc.mutator.ExecuteMove(gc.board, move, 1)
 	}
 	fmt.Println("Board after user move is executed:")
-	fmt.Println(gc.board)
+	gc.board.Display()
 
 	// TODO: once the above is complete, need a method to get all possible moves for the
 	// computer. This will involve certain things like the board's ability to remember the last move,
