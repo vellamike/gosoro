@@ -84,7 +84,7 @@ func user_move() []ds.Move { // Takes user input as a string and returns a slice
 	return moves
 }
 
-func (gc gamecontroller) UserMove() {
+func (gc *gamecontroller) UserMove() {
 	// Ask the user for a move, create an instruction from his reply, apply it to the board
 
 	moves := user_move()
