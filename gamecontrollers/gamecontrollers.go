@@ -15,6 +15,11 @@ type gamecontroller struct {
 	mutator mutators.Mutator
 }
 
+func (self gamecontroller) Winner() int {
+	return 0
+}
+
+
 func NewGameController(generator func() ds.Board, ai ai.AI, mutator mutators.Mutator) *gamecontroller {
 	board := generator()
 	b := gamecontroller{board, ai, mutator}
@@ -102,4 +107,18 @@ func (gc *gamecontroller) UserMove() {
 	// TODO: once the above is complete, need a method to get all possible moves for the
 	// computer. This will involve certain things like the board's ability to remember the last move,
 	// or it is possible that this logic should live in the mutator.
+}
+
+func (gc *gamecontroller) ComputerMove() {
+	// Step 1: Ask the AI for the best instruction
+
+	move := gc.ai.BestInstruction(gc.board)
+	fmt.Println("Computer's response:")
+	fmt.Println(move)
+	// Step 2: Apply the instruction
+
+	gc.board = gc.mutator.ExecuteMove(gc.board, move, 2)
+
+	fmt.Println("Board after computer's response:")
+	gc.board.Display()
 }

@@ -82,14 +82,10 @@ func main() {
 	// Display the board to the user
 	controller.DisplayBoard()
 
-	// Ask the user for their move
-	controller.UserMove()
-
-	// Ask the user for their move again, the board which moves should be the mutated board
-	controller.UserMove()
-
-	// TO DO NEXT: The controller asks the user for an input move and plays it.
-	// An instruction is instantiated from the user string which is passed to the board
-	// to mutate it.
-
+	for controller.Winner() < 1 {
+		// Ask the user for their move
+		controller.UserMove()
+		// Computer plays its move
+		controller.ComputerMove()
+	}
 }
