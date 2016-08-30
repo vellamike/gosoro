@@ -67,40 +67,25 @@ func score(board ds.Board) int {
 
 func main() {
 
-	//	fmt.Println("Instantiating a random board")
-	//	newboard := utils.Random_board(32)
-	//	newboard.Display()
-	//	fmt.Println("Play now begins...")
-	//	for true {
-	//		board1, instructions := computer_move(newboard)
-	//		fmt.Println("Final board:")
-	//		board1.Display()
-	//		fmt.Println(instructions)
-	//		newboard = execute_user_move(board1)
-	//		newboard.Display()
-	//	}
-
-	// first get a new board generator
-
-	// for this iteration I would first like to compose the game controller and display the board it starts out with
-
+	// instantiate a board generator
 	board_generator := boardgenerators.Randomboard
 
-	// then a new mutator
-
+	// instantiate a mutator
 	mutator := mutators.Mutator{}
 
-	// then a new AI
-
+	// instantiate an AI
 	ai := ai.AI{}
 
-	// finally get a game controller and put all those things in it
-
+	// instantiate a game controller, composed of the board generator, AI and the mutator
 	controller := gamecontrollers.NewGameController(board_generator, ai, mutator)
 
-	// first display the board
+	// Display the board to the user
 	controller.DisplayBoard()
 
+	// Ask the user for their move
+	controller.UserMove()
+
+	// Ask the user for their move again, the board which moves should be the mutated board
 	controller.UserMove()
 
 	// TO DO NEXT: The controller asks the user for an input move and plays it.
