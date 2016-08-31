@@ -29,6 +29,7 @@ import "gosoro/boardgenerators"
 import "gosoro/mutators"
 import "gosoro/gamecontrollers"
 import "gosoro/ai"
+import "fmt"
 
 func score(board ds.Board) int {
 	//returns the score
@@ -42,28 +43,6 @@ func score(board ds.Board) int {
 	return total
 }
 
-//func computer_move(board ds.Board) (ds.Board, []ds.Instruction) {
-//	// Need to update so that the computer choses a move based on some optimality criterion
-//	boards, instruction_sets := all_moves(board, 1)
-//	max_index := 0
-//	current_best_score := 0
-//	for board_index, b := range boards {
-//		s := score(b)
-//		if s > current_best_score {
-//			current_best_score = s
-//			max_index = board_index
-//		}
-//	}
-//
-//	fmt.Println("I, the computer, chose the moves which finally evaluate to:")
-//	boards[max_index].Display()
-//	for _, instruc := range instruction_sets[max_index] {
-//		fmt.Println(instruc.Row, instruc.Column, instruc.Direction)
-//		instruc.Board.Display()
-//		fmt.Println("---")
-//	}
-//	return boards[max_index], instruction_sets[max_index] // return final board and corresponding instruction sets
-//}
 
 func main() {
 
@@ -85,7 +64,12 @@ func main() {
 	for controller.Winner() < 1 {
 		// Ask the user for their move
 		controller.UserMove()
+		fmt.Println("Last position of User:")
+		fmt.Println(controller.LastUserPosition())
+
 		// Computer plays its move
 		controller.ComputerMove()
+		fmt.Println("Last position of Computer:")
+		fmt.Println(controller.LastComputerPosition())
 	}
 }

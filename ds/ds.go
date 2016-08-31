@@ -9,13 +9,13 @@ type BoardInterface interface {
 type Player struct {
 	//Represents a player's territory in their frame of reference
 	Positions [2][8]int
+	Moved bool
+	LastPosition Coord
 }
 
 type Coord struct {
 	Row    int
 	Column int
-	Board  *Board
-	Player *Player
 }
 
 type Board struct {

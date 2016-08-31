@@ -19,6 +19,13 @@ func (self gamecontroller) Winner() int {
 	return 0
 }
 
+func (self gamecontroller) LastUserPosition() ds.Coord {
+	return self.board.Player_1.LastPosition
+}
+
+func (self gamecontroller) LastComputerPosition() ds.Coord {
+	return self.board.Player_2.LastPosition
+}
 
 func NewGameController(generator func() ds.Board, ai ai.AI, mutator mutators.Mutator) *gamecontroller {
 	board := generator()
@@ -104,6 +111,13 @@ func (gc *gamecontroller) UserMove() {
 	fmt.Println("Board after user move is executed:")
 	gc.board.Display()
 
+	fmt.Println("Now human performing a capture")
+	last_column := gc.LastUserPosition().Column
+	gc.board = gc.mutator.Capture(gc.board, 1, last_column)
+
+	fmt.Println("Board after capture performed:")
+	gc.board.Display()
+
 	// TODO: once the above is complete, need a method to get all possible moves for the
 	// computer. This will involve certain things like the board's ability to remember the last move,
 	// or it is possible that this logic should live in the mutator.
@@ -121,4 +135,12 @@ func (gc *gamecontroller) ComputerMove() {
 
 	fmt.Println("Board after computer's response:")
 	gc.board.Display()
+
+	fmt.Println("Now computer performing a capture")
+	last_column := gc.LastComputerPosition().Column
+	gc.board = gc.mutator.Capture(gc.board, 2, last_column)
+
+	fmt.Println("Board after capture performed:")
+	gc.board.Display()
+
 }
