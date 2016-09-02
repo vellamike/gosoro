@@ -35,21 +35,50 @@ func (Mutator) ExecuteMove(board ds.Board, move ds.Move, player_number int) ds.B
 	// very primitive operations. The Board can provide the mutator with all the methods
 	// it needs to understand what moves are possible according to the Mutator ruleset.
 
-	var player *ds.Player
+	var player, opponent *ds.Player
 
 	if player_number == 1 {
 		player = &board.Player_1
+		opponent = &board.Player_2
 	} else {
 		player = &board.Player_2
+		opponent = &board.Player_1
 	}
 
+	action := move.Action
+
+	if action == "A" || action == "C" {
+		move_seeds(player, move)
+	} else if action == "K" {
+		capture(player, opponent, move)
+	}
+
+	return board
+}
+
+func capture(agressor, victim *ds.Player, move ds.Move) {
+
+	var captured_seeds int
+	column := move.Column
+	opponent_column := 7 - column
+
+	captured_seeds += victim.Positions[0][opponent_column]
+	victim.Positions[0][opponent_column] = 0
+	captured_seeds += victim.Positions[1][opponent_column]
+	victim.Positions[1][opponent_column] = 0
+
+	agressor.Positions[1][column] += captured_seeds
+
+}
+
+func move_seeds(player *ds.Player, move ds.Move) {
 	seeds_in_hand := player.Positions[move.Row][move.Column]
 	player.Positions[move.Row][move.Column] = 0
 	current_row := move.Row
 	current_column := move.Column
 
 	for seeds_in_hand > 0 {
-		next_row, next_column := next_position(current_row, current_column, move.Direction)
+		next_row, next_column := next_position(current_row, current_column, move.Action)
 		player.Positions[next_row][next_column] += 1
 		seeds_in_hand -= 1
 		current_row = next_row
@@ -57,7 +86,6 @@ func (Mutator) ExecuteMove(board ds.Board, move ds.Move, player_number int) ds.B
 	}
 
 	player.LastPosition = ds.Coord{current_row, current_column}
-	return board
 }
 
 func (Mutator) Capture(board ds.Board, capturing_player int, column int) ds.Board {

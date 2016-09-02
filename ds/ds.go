@@ -33,7 +33,7 @@ type Instruction struct {
 type Move struct {
 	Row       int
 	Column    int
-	Direction string
+	Action string
 }
 
 func reverse_array(arr [8]int) [8]int {

@@ -3,6 +3,7 @@ package gamecontrollers
 import "gosoro/ds"
 import "gosoro/ai"
 import "gosoro/mutators"
+import "gosoro/rulesets"
 
 import "fmt"
 import "bufio"
@@ -13,6 +14,7 @@ type gamecontroller struct {
 	board   ds.Board
 	ai      ai.AI
 	mutator mutators.Mutator
+	ruleset rulesets.RuleSet
 }
 
 func (self gamecontroller) Winner() int {
@@ -27,9 +29,9 @@ func (self gamecontroller) LastComputerPosition() ds.Coord {
 	return self.board.Player_2.LastPosition
 }
 
-func NewGameController(generator func() ds.Board, ai ai.AI, mutator mutators.Mutator) *gamecontroller {
+func NewGameController(generator func() ds.Board, ai ai.AI, mutator mutators.Mutator, ruleset rulesets.RuleSet) *gamecontroller {
 	board := generator()
-	b := gamecontroller{board, ai, mutator}
+	b := gamecontroller{board, ai, mutator, ruleset}
 	return &b
 
 }
@@ -66,8 +68,7 @@ func perform_capture(board ds.Board, player_number, row, column int) (ds.Board, 
 		i2 := ds.Instruction{row, column, "C", board}
 		next_instructions = append(next_instructions, i2)
 	}
-	//fmt.Println("Capture has been evaluated, the following instructions are being returned:")
-	//fmt.Println(next_instructions)
+
 	return board, next_instructions
 }
 
@@ -98,7 +99,6 @@ func user_move() []ds.Move { // Takes user input as a string and returns a slice
 
 func (gc *gamecontroller) UserMove() {
 	// Ask the user for a move, create an instruction from his reply, apply it to the board
-
 	moves := user_move()
 	fmt.Println("User's moves:")
 	fmt.Println(moves)
@@ -110,23 +110,12 @@ func (gc *gamecontroller) UserMove() {
 	}
 	fmt.Println("Board after user move is executed:")
 	gc.board.Display()
-
-	fmt.Println("Now human performing a capture")
-	last_column := gc.LastUserPosition().Column
-	gc.board = gc.mutator.Capture(gc.board, 1, last_column)
-
-	fmt.Println("Board after capture performed:")
-	gc.board.Display()
-
-	// TODO: once the above is complete, need a method to get all possible moves for the
-	// computer. This will involve certain things like the board's ability to remember the last move,
-	// or it is possible that this logic should live in the mutator.
 }
 
 func (gc *gamecontroller) ComputerMove() {
 	// Step 1: Ask the AI for the best instruction
 
-	move := gc.ai.BestInstruction(gc.board)
+	move := gc.ai.BestInstruction(gc.board, gc.ruleset)
 	fmt.Println("Computer's response:")
 	fmt.Println(move)
 	// Step 2: Apply the instruction
@@ -137,8 +126,6 @@ func (gc *gamecontroller) ComputerMove() {
 	gc.board.Display()
 
 	fmt.Println("Now computer performing a capture")
-	last_column := gc.LastComputerPosition().Column
-	gc.board = gc.mutator.Capture(gc.board, 2, last_column)
 
 	fmt.Println("Board after capture performed:")
 	gc.board.Display()

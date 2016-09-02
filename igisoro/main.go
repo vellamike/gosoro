@@ -29,6 +29,7 @@ import "gosoro/boardgenerators"
 import "gosoro/mutators"
 import "gosoro/gamecontrollers"
 import "gosoro/ai"
+import "gosoro/rulesets"
 import "fmt"
 
 func score(board ds.Board) int {
@@ -55,8 +56,15 @@ func main() {
 	// instantiate an AI
 	ai := ai.AI{}
 
+	igisoro_ruleset := rulesets.RuleSet{}
+
 	// instantiate a game controller, composed of the board generator, AI and the mutator
-	controller := gamecontrollers.NewGameController(board_generator, ai, mutator)
+	controller := gamecontrollers.NewGameController(
+		board_generator,
+		ai,
+		mutator,
+		igisoro_ruleset,
+	)
 
 	// Display the board to the user
 	controller.DisplayBoard()
