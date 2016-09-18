@@ -22,10 +22,8 @@ func random_position(num_seeds int) ds.Player {
 
 func Random_board(num_seeds int) ds.Board {
 	//Initialize a random board
-	var newboard ds.Board
+	player1 := random_position(num_seeds)
+	player2 := random_position(num_seeds)
 
-	newboard.Player_1 = random_position(num_seeds)
-	newboard.Player_2 = random_position(num_seeds)
-
-	return newboard
+	return ds.NewBoard(player1, player2)
 }

@@ -2,8 +2,8 @@ package gamecontrollers
 
 import "gosoro/ds"
 import "gosoro/ai"
-import "gosoro/mutators"
 import "gosoro/rulesets"
+import "gosoro/evaluators"
 
 import "fmt"
 import "bufio"
@@ -11,10 +11,10 @@ import "os"
 import "strconv"
 
 type gamecontroller struct {
-	board   ds.Board
-	ai      ai.AI
-	mutator mutators.Mutator
-	ruleset rulesets.RuleSet
+	board     ds.Board
+	ai        ai.AI
+	ruleset   rulesets.RuleSet
+	evaluator evaluators.Evaluator
 }
 
 func (self gamecontroller) Winner() int {
@@ -29,9 +29,9 @@ func (self gamecontroller) LastComputerPosition() ds.Coord {
 	return self.board.Player_2.LastPosition
 }
 
-func NewGameController(generator func() ds.Board, ai ai.AI, mutator mutators.Mutator, ruleset rulesets.RuleSet) *gamecontroller {
+func NewGameController(generator func() ds.Board, ai ai.AI, ruleset rulesets.RuleSet, evaluator evaluators.Evaluator) *gamecontroller {
 	board := generator()
-	b := gamecontroller{board, ai, mutator, ruleset}
+	b := gamecontroller{board, ai, ruleset, evaluator}
 	return &b
 
 }
@@ -49,29 +49,6 @@ func capture_possible(board ds.Board, player_number, row, column int) bool {
 	return (opponent_row_0_seeds != 0 && opponent_row_1_seeds != 0 && row == 1)
 }
 
-func perform_capture(board ds.Board, player_number, row, column int) (ds.Board, []ds.Instruction) {
-	p, p_op := ds.PlayersFromName(player_number, &board)
-	opponent_column := 7 - column
-	opponent_row_0_seeds := p_op.Positions[0][opponent_column]
-	opponent_row_1_seeds := p_op.Positions[1][opponent_column]
-	p_op.Positions[0][opponent_column] = 0
-	p_op.Positions[1][opponent_column] = 0
-	captured_seeds := opponent_row_0_seeds + opponent_row_1_seeds
-	p.Positions[row][column] += captured_seeds
-
-	var next_instructions []ds.Instruction
-
-	i1 := ds.Instruction{row, column, "A", board}
-	next_instructions = []ds.Instruction{i1}
-
-	if board.Is_bidirectional(row, column) {
-		i2 := ds.Instruction{row, column, "C", board}
-		next_instructions = append(next_instructions, i2)
-	}
-
-	return board, next_instructions
-}
-
 func user_move() []ds.Move { // Takes user input as a string and returns a slice of Moves
 	reader := bufio.NewReader(os.Stdin)
 	fmt.Print("Enter your move: ")
@@ -79,19 +56,19 @@ func user_move() []ds.Move { // Takes user input as a string and returns a slice
 	t := string(text)
 
 	var rows, columns []int
-	var directions []string
+	var actions []string
 
 	var moves []ds.Move
 
 	for i := 1; i < len(t)/3+1; i++ {
 		row, _ := strconv.Atoi(t[i*3-3 : i*3-2])
 		column, _ := strconv.Atoi(t[i*3-2 : i*3-1])
-		direction := t[i*3-1 : i*3]
+		action := t[i*3-1 : i*3]
 		rows = append(rows, row)
 		columns = append(columns, column)
-		directions = append(directions, direction)
+		actions = append(actions, action)
 
-		moves = append(moves, ds.Move{row, column, direction})
+		moves = append(moves, ds.Move{row, column, action})
 
 	}
 	return moves
@@ -106,7 +83,7 @@ func (gc *gamecontroller) UserMove() {
 	fmt.Println("Board before user move is executed:")
 	gc.board.Display()
 	for _, move := range moves {
-		gc.board = gc.mutator.ExecuteMove(gc.board, move, 1)
+		gc.board = gc.board.ExecuteMove(move, 1)
 	}
 	fmt.Println("Board after user move is executed:")
 	gc.board.Display()
@@ -115,12 +92,13 @@ func (gc *gamecontroller) UserMove() {
 func (gc *gamecontroller) ComputerMove() {
 	// Step 1: Ask the AI for the best instruction
 
-	move := gc.ai.BestInstruction(gc.board, gc.ruleset)
+	move := gc.ai.BestInstruction(gc.board, gc.ruleset, gc.evaluator)
 	fmt.Println("Computer's response:")
 	fmt.Println(move)
+
 	// Step 2: Apply the instruction
 
-	gc.board = gc.mutator.ExecuteMove(gc.board, move, 2)
+	gc.board = gc.board.ExecuteMove(move, 2)
 
 	fmt.Println("Board after computer's response:")
 	gc.board.Display()

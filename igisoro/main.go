@@ -26,10 +26,11 @@ package main
 
 import "gosoro/ds"
 import "gosoro/boardgenerators"
-import "gosoro/mutators"
 import "gosoro/gamecontrollers"
 import "gosoro/ai"
 import "gosoro/rulesets"
+import "gosoro/evaluators"
+
 import "fmt"
 
 func score(board ds.Board) int {
@@ -44,26 +45,24 @@ func score(board ds.Board) int {
 	return total
 }
 
-
 func main() {
 
 	// instantiate a board generator
 	board_generator := boardgenerators.Randomboard
-
-	// instantiate a mutator
-	mutator := mutators.Mutator{}
 
 	// instantiate an AI
 	ai := ai.AI{}
 
 	igisoro_ruleset := rulesets.RuleSet{}
 
+	evaluator := evaluators.Evaluator{}
+
 	// instantiate a game controller, composed of the board generator, AI and the mutator
 	controller := gamecontrollers.NewGameController(
 		board_generator,
 		ai,
-		mutator,
 		igisoro_ruleset,
+		evaluator,
 	)
 
 	// Display the board to the user

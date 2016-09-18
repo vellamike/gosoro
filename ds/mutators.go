@@ -1,22 +1,11 @@
-package mutators
+package ds
 
-import "gosoro/ds"
 import "fmt"
 
 type Mutator struct {
 }
 
-func pop_instruction_stack(stack *[][]ds.Instruction) []ds.Instruction {
-	// An instruction stack is slice of slices of instructions.
-	// This method returns a value off the stack, and removes that value
-	// From the stack
-	len_stack := len(*stack)
-	val := (*stack)[len_stack-1]
-	*stack = (*stack)[:len_stack-1]
-	return val
-}
-
-func (Mutator) ExecuteMove(board ds.Board, move ds.Move, player_number int) ds.Board {
+func (Mutator) ExecuteMove(board Board, move Move, player_number int) Board {
 	fmt.Println("Updating board")
 
 	// Algorithm description:
@@ -35,7 +24,7 @@ func (Mutator) ExecuteMove(board ds.Board, move ds.Move, player_number int) ds.B
 	// very primitive operations. The Board can provide the mutator with all the methods
 	// it needs to understand what moves are possible according to the Mutator ruleset.
 
-	var player, opponent *ds.Player
+	var player, opponent *Player
 
 	if player_number == 1 {
 		player = &board.Player_1
@@ -49,29 +38,29 @@ func (Mutator) ExecuteMove(board ds.Board, move ds.Move, player_number int) ds.B
 
 	if action == "A" || action == "C" {
 		move_seeds(player, move)
-	} else if action == "K" {
+	} else if action == "S" {
 		capture(player, opponent, move)
 	}
 
 	return board
 }
 
-func capture(agressor, victim *ds.Player, move ds.Move) {
+func capture(agressor, victim *Player, move Move) {
 
 	var captured_seeds int
 	column := move.Column
-	opponent_column := 7 - column
 
-	captured_seeds += victim.Positions[0][opponent_column]
-	victim.Positions[0][opponent_column] = 0
-	captured_seeds += victim.Positions[1][opponent_column]
-	victim.Positions[1][opponent_column] = 0
+	victim_column := 7 - column
+	victim_row := (3 - move.Row)
+
+	captured_seeds += victim.Positions[victim_row][victim_column]
+	victim.Positions[victim_row][victim_column] = 0
 
 	agressor.Positions[1][column] += captured_seeds
 
 }
 
-func move_seeds(player *ds.Player, move ds.Move) {
+func move_seeds(player *Player, move Move) {
 	seeds_in_hand := player.Positions[move.Row][move.Column]
 	player.Positions[move.Row][move.Column] = 0
 	current_row := move.Row
@@ -85,14 +74,14 @@ func move_seeds(player *ds.Player, move ds.Move) {
 		current_column = next_column
 	}
 
-	player.LastPosition = ds.Coord{current_row, current_column}
+	player.LastPosition = Coord{current_row, current_column}
 }
 
-func (Mutator) Capture(board ds.Board, capturing_player int, column int) ds.Board {
+func (Mutator) Capture(board Board, capturing_player int, column int) Board {
 	fmt.Println("Capturing!")
 
-	var agressor *ds.Player
-	var victim *ds.Player
+	var agressor *Player
+	var victim *Player
 
 	if capturing_player == 1 {
 		agressor = &board.Player_1

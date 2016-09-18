@@ -8,8 +8,8 @@ type BoardInterface interface {
 
 type Player struct {
 	//Represents a player's territory in their frame of reference
-	Positions [2][8]int
-	Moved bool
+	Positions    [2][8]int
+	Moved        bool
 	LastPosition Coord
 }
 
@@ -21,6 +21,11 @@ type Coord struct {
 type Board struct {
 	Player_1 Player
 	Player_2 Player
+	mutator  Mutator
+}
+
+func NewBoard(player1, player2 Player) Board {
+	return Board{player1, player2, Mutator{}}
 }
 
 type Instruction struct {
@@ -31,8 +36,8 @@ type Instruction struct {
 }
 
 type Move struct {
-	Row       int
-	Column    int
+	Row    int
+	Column int
 	Action string
 }
 
@@ -44,17 +49,6 @@ func reverse_array(arr [8]int) [8]int {
 		reversed_array[i] = arr[num_elements-i-1]
 	}
 	return reversed_array
-}
-
-func (this Board) Is_bidirectional(row, column int) bool {
-	//Whether clockwise and counterclockwise moves are allowed from this position
-	var bidir bool
-	if column == 0 || column == 1 || column == 6 || column == 7 {
-		bidir = true
-	} else {
-		bidir = false
-	}
-	return bidir
 }
 
 func (this Board) Display() {
@@ -75,4 +69,9 @@ func PlayersFromName(player_number int, board *Board) (p, p_op *Player) {
 		p_op = &board.Player_1
 	}
 	return p, p_op
+}
+
+func (this Board) ExecuteMove(move Move, player_number int) Board {
+	mutator := Mutator{}
+	return mutator.ExecuteMove(this, move, player_number)
 }
