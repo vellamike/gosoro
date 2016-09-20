@@ -15,7 +15,8 @@ func (RuleSet) AvailableMoves (board ds.Board, player_number int) []ds.Move{
 	} else {
 		player = board.Player_1
 	}
-	
+
+	var unterminated_moves []ds.Move
 	var moves []ds.Move
 
 	// outer loop: row
@@ -27,7 +28,15 @@ func (RuleSet) AvailableMoves (board ds.Board, player_number int) []ds.Move{
 		}
 
 	}
+
+	
 	fmt.Println("All available moves to computer:")
 	fmt.Println(moves)
 	return moves
+}
+
+func continuationMoves (board ds.Board, player_number int, move ds.Move) {
+	// given a move, return all the moves that continue from it, if empty then it's a terminal move
+	var moves []ds.Move
+	
 }
