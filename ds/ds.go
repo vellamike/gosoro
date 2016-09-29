@@ -24,6 +24,17 @@ type Board struct {
 	mutator  Mutator
 }
 
+func (this Board) PlayerFromNumber(player_number int) Player {
+	var player Player
+	if player_number == 2 {
+		player = this.Player_2
+	} else {
+		player = this.Player_1
+	}
+
+	return player
+}
+
 func NewBoard(player1, player2 Player) Board {
 	return Board{player1, player2, Mutator{}}
 }
@@ -74,4 +85,12 @@ func PlayersFromName(player_number int, board *Board) (p, p_op *Player) {
 func (this Board) ExecuteMove(move Move, player_number int) Board {
 	mutator := Mutator{}
 	return mutator.ExecuteMove(this, move, player_number)
+}
+
+func (this Board) ExecuteMoveSequence(move_sequence []Move, player_number int) Board {
+	board := this
+	for _, move := range move_sequence {
+		board = board.ExecuteMove(move, player_number)
+	}
+	return board
 }

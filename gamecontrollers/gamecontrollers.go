@@ -92,13 +92,13 @@ func (gc *gamecontroller) UserMove() {
 func (gc *gamecontroller) ComputerMove() {
 	// Step 1: Ask the AI for the best instruction
 
-	move := gc.ai.BestInstruction(gc.board, gc.ruleset, gc.evaluator)
+	moveSequence := gc.ai.BestInstruction(gc.board, gc.ruleset, gc.evaluator)
 	fmt.Println("Computer's response:")
-	fmt.Println(move)
+	fmt.Println(moveSequence)
 
 	// Step 2: Apply the instruction
 
-	gc.board = gc.board.ExecuteMove(move, 2)
+	gc.board = gc.board.ExecuteMoveSequence(moveSequence, 2)
 
 	fmt.Println("Board after computer's response:")
 	gc.board.Display()

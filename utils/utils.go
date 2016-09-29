@@ -1,14 +1,15 @@
 package utils
 
 import "math/rand"
-import "time"
+
+//import "time"
 import "gosoro/ds"
 
 func random_position(num_seeds int) ds.Player {
 	//choose a random pit
 	var p ds.Player
 
-	rand.Seed(time.Now().UTC().UnixNano())
+	//rand.Seed(time.Now().UTC().UnixNano()) // keep the board the same every time, good for debug
 
 	for i := 0; i < num_seeds; i++ {
 		row := rand.Intn(2)

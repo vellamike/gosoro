@@ -6,7 +6,6 @@ type Mutator struct {
 }
 
 func (Mutator) ExecuteMove(board Board, move Move, player_number int) Board {
-	fmt.Println("Updating board")
 
 	// Algorithm description:
 
@@ -51,10 +50,11 @@ func capture(agressor, victim *Player, move Move) {
 	column := move.Column
 
 	victim_column := 7 - column
-	victim_row := (3 - move.Row)
+	captured_seeds += victim.Positions[0][victim_column]
+	captured_seeds += victim.Positions[1][victim_column]
 
-	captured_seeds += victim.Positions[victim_row][victim_column]
-	victim.Positions[victim_row][victim_column] = 0
+	victim.Positions[0][victim_column] = 0
+	victim.Positions[1][victim_column] = 0
 
 	agressor.Positions[1][column] += captured_seeds
 
