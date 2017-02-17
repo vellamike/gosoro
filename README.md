@@ -1,3 +1,5 @@
+# Warning: Gosoro is still a bit of an "experimental" work in progress, these instructions may quickly get out of date
+
 # gosoro
 Igisoro and Omweso are games of the mancala family.
 
