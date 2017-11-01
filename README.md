@@ -1,5 +1,3 @@
-# Warning: Gosoro is still a bit of an "experimental" work in progress, these instructions may quickly get out of date
-
 # gosoro
 Igisoro and Omweso are games of the mancala family.
 
@@ -8,8 +6,11 @@ In this project I aim to implement Igisoro and Omweso AIs in the Go programming 
 # How to play
 
 To start a game:
+
+currently, the only supported mancala-family game is "igisoro".
+
 ```
-go run main.go
+go run igisoro/main.go
 ```
 The computer will play the first move.
 
