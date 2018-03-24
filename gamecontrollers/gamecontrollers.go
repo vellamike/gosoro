@@ -19,10 +19,12 @@ type gamecontroller struct {
 	NextPlayer int
 }
 
+// TODO: Still needed?
 func (self gamecontroller) LastUserPosition() ds.Coord {
 	return self.board.Player_1.LastPosition
 }
 
+// TODO: Still Needed?
 func (self gamecontroller) LastComputerPosition() ds.Coord {
 	return self.board.Player_2.LastPosition
 }
@@ -43,6 +45,7 @@ func (gc gamecontroller) DisplayBoard() {
 	gc.board.Display()
 }
 
+// TODO: This should be handled by the ruleset?
 func capture_possible(board ds.Board, player_number, row, column int) bool {
 	//Returns whether landing in this pit would result in capturing oponent's seeds
 	_, p_op := ds.PlayersFromName(player_number, &board)
@@ -52,6 +55,7 @@ func capture_possible(board ds.Board, player_number, row, column int) bool {
 	return (opponent_row_0_seeds != 0 && opponent_row_1_seeds != 0 && row == 1)
 }
 
+// TODO: No longer needed?
 func user_move() []ds.Move { // Takes user input as a string and returns a slice of Moves
 	reader := bufio.NewReader(os.Stdin)
 	fmt.Print("Enter your move: ")
@@ -77,23 +81,28 @@ func user_move() []ds.Move { // Takes user input as a string and returns a slice
 	return moves
 }
 
+
 func (gc *gamecontroller) UserMove() {
-	// Ask the user for a move, create an instruction from his reply, apply it to the board
+	// Ask the user for a move, create an instruction from their reply
+	// apply it to the board, update the controller:
+	// 0. Controller history will require updating.
+	// 1. Has the user won the game?
+	// 2. Whose move is next?
 
-	// STEP 1: Find out what the possible moves are
-
-	validMove := false
+	// Step 1: Find out what the possible moves are
 
 	fmt.Println("Computing moves available to user...")
 	availableMoves := gc.ruleset.AvailableMoves(gc.board, 0)
 
-	var move int;
+	validMove := false
+
+	var chosenMove int
+
 	for validMove == false {
 		fmt.Println("Available moves are...")
 		for i, move := range availableMoves {
 			fmt.Println(i, move)
 		}
-		fmt.Println("<<<===>>>")
 
 		reader := bufio.NewReader(os.Stdin)
 		fmt.Print("Enter your move: ")
@@ -101,17 +110,18 @@ func (gc *gamecontroller) UserMove() {
 		t := string(text)
 
 		fmt.Println("As a string, the selected move is", t)
-		move, _ = strconv.Atoi(t[0 : len(t)-1])
-		fmt.Println("You selected move: ", move)
+		chosenMove, err := strconv.Atoi(t[0 : len(t) - 1])
 
-		// check that the move is valid:
-		validMove = (move > 0) && move < len(availableMoves)
+		// check that the move is valid, if not then the user will be asked again
+		validMove = (err == nil) && (chosenMove >= 0) && chosenMove < len(availableMoves)
 		if validMove == false {
 			fmt.Println("That move was not a valid move, please try again..")
 		}
 	}
-	selectedUserMove := availableMoves[move][0] //I think there is a small fix here somewhere, since available moves should be only one move.
-	gc.board = gc.board.ExecuteMove(selectedUserMove, 1) // board should be updated too, when executing move it should keep a record of what it is doing..
+
+	//TODO: Available moves should only contain one move
+	selectedUserMove := availableMoves[chosenMove][0]
+	gc.board = gc.board.ExecuteMove(selectedUserMove, 1)
 	fmt.Println("Board after the last move...")
 	gc.board.Display()
 }

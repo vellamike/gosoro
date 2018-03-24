@@ -22,3 +22,9 @@ For example, `02C16A` corresponds to the move row 0, column 2, move clockwise, c
 # GOPATH
 
 GOPATH should point to a directoy of which src/gosoro is a subdirectory. This is go convention and the best way to make sure that tooling works.
+
+
+## TODO
+
+1. Overall structure - does it fit in well with a Go project?
+2. Decide how the game controller will fix the next player. Right now the AI never gets to play, but it is necessary to make it so that a branch move works too. Probably the ruleset should, given a move, and a board before and after the move has been executed, be able to decide whether it is a leaf move or not and if not what the available moves are.
