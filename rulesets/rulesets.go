@@ -3,6 +3,41 @@ package rulesets
 import "gosoro/ds"
 //import "fmt"
 
+
+type IgisoroRuleSet struct{
+
+}
+
+
+// Takes a board and player number and returns the list of possible moves for this player.
+// This list includes branch and leaf moves.
+func (this IgisoroRuleSet) AvailableMoves (board ds.Board, player_number int) []ds.Move {
+	//keep the moves here
+	var moves []ds.Move //store both leaf and branch moves
+	var player ds.Player
+
+	// players here are referred to in terms of the board. This probably should be made more clear at some point
+	if player_number == 1 {
+		player = board.Player_2
+	} else {
+		player = board.Player_1
+	}
+
+	//var moves_buffer [][]ds.Move // here we store the moves which may either be terminal or continued
+
+	// First need to get all the stub moves
+	for r := 0; r < 2; r++ {
+		for c := 0; c < 8; c++ {
+			if player.Positions[r][c] > 1 {
+				stub := ds.Move{r, c, "C"}
+				moves = append(moves, stub)
+			}
+		}
+	}
+	return moves
+}
+
+
 type RuleSet struct {
 }
 

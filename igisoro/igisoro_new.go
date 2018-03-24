@@ -35,8 +35,10 @@ func main() {
 	// instantiate an AI
 	ai := ai.AI{}
 
-	igisoro_ruleset := rulesets.RuleSet{}
+	// Get a ruleset for the game we are playing, which is Igisoro
+	igisoro_ruleset := rulesets.IgisoroRuleSet{}
 
+	// Evaluator will be used by the AI to figure out what good and bad moves are
 	evaluator := evaluators.Evaluator{}
 
 	// instantiate a game controller, composed of the board generator, AI and the mutator
@@ -48,7 +50,7 @@ func main() {
 	)
 
 	// Display the board to the user
-	fmt.Println("Game started, board as follows:")
+	fmt.Println("===> Game started, board as follows:")
 	controller.DisplayBoard()
 
 	for controller.Winner < 0 { // keep looping until there is a winner
@@ -64,5 +66,5 @@ func main() {
 		}
 	}
 
-	fmt.Println("The winner is player ", controller.Winner)
+	fmt.Println("===> The winner is player ", controller.Winner)
 }

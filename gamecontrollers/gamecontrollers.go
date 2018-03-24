@@ -13,7 +13,7 @@ import "strconv"
 type gamecontroller struct {
 	board      ds.Board //DS which contains the board position, next player to move etc...
 	ai         ai.AI
-	ruleset    rulesets.RuleSet // Decides what moves are allowed
+	ruleset    rulesets.IgisoroRuleSet // Decides what moves are allowed
 	evaluator  evaluators.Evaluator
 	Winner     int // which player has won, -1 = neither yet, 0 = player 0, 1 = player 1
 	NextPlayer int
@@ -29,7 +29,7 @@ func (self gamecontroller) LastComputerPosition() ds.Coord {
 	return self.board.Player_2.LastPosition
 }
 
-func NewGameController(generator func() ds.Board, ai ai.AI, ruleset rulesets.RuleSet, evaluator evaluators.Evaluator) *gamecontroller {
+func NewGameController(generator func() ds.Board, ai ai.AI, ruleset rulesets.IgisoroRuleSet, evaluator evaluators.Evaluator) *gamecontroller {
 	board := generator()
 	b := gamecontroller{board,
 		ai,
@@ -109,9 +109,8 @@ func (gc *gamecontroller) UserMove() {
 		text, _ := reader.ReadString('\n')
 		t := string(text)
 
-		fmt.Println("As a string, the selected move is", t)
-		chosenMove, err := strconv.Atoi(t[0 : len(t) - 1])
-
+		c, err := strconv.Atoi(t[0 : len(t) - 1])
+		chosenMove = c
 		// check that the move is valid, if not then the user will be asked again
 		validMove = (err == nil) && (chosenMove >= 0) && chosenMove < len(availableMoves)
 		if validMove == false {
@@ -120,29 +119,45 @@ func (gc *gamecontroller) UserMove() {
 	}
 
 	//TODO: Available moves should only contain one move
-	selectedUserMove := availableMoves[chosenMove][0]
-	gc.board = gc.board.ExecuteMove(selectedUserMove, 1)
-	fmt.Println("Board after the last move...")
-	gc.board.Display()
+	selectedUserMove := availableMoves[chosenMove]
+
+	fmt.Println("Applying the move ", chosenMove, " :", selectedUserMove)
+
+	gc.ApplyMove(selectedUserMove, 0)
 }
 
-func (gc *gamecontroller) ComputerMove() {
-	// Step 1: Ask the AI for the best instruction
 
-	moveSequence := gc.ai.BestInstruction(gc.board, gc.ruleset, gc.evaluator)
-	fmt.Println("Computer's response:")
-	fmt.Println(moveSequence)
-
-	// Step 2: Apply the instruction
-
-	gc.board = gc.board.ExecuteMoveSequence(moveSequence, 2)
-
-	fmt.Println("Board after computer's response:")
-	gc.board.Display()
-
-	fmt.Println("Now computer performing a capture")
-
-	fmt.Println("Board after capture performed:")
-	gc.board.Display()
+func (gc *gamecontroller) ApplyMove(move ds.Move, user int){
+	// this function has the following responsibilities:
+	// 1. Add the move and old boards to the controller's record
+	// 2. Update the board to show the latest move
+	// 3. Check if either player has won the game
+	// 4. If there isn't a winner, decide who the next player is (same player as applied the move
+	//    In the case of a branch move and same player otherwise.
 
 }
+
+
+
+
+
+//func (gc *gamecontroller) ComputerMove() {
+//	// Step 1: Ask the AI for the best instruction
+//
+//	moveSequence := gc.ai.BestInstruction(gc.board, gc.ruleset, gc.evaluator)
+//	fmt.Println("Computer's response:")
+//	fmt.Println(moveSequence)
+//
+//	// Step 2: Apply the instruction
+//
+//	gc.board = gc.board.ExecuteMoveSequence(moveSequence, 2)
+//
+//	fmt.Println("Board after computer's response:")
+//	gc.board.Display()
+//
+//	fmt.Println("Now computer performing a capture")
+//
+//	fmt.Println("Board after capture performed:")
+//	gc.board.Display()
+//
+//}
