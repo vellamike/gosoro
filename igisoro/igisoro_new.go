@@ -47,7 +47,7 @@ func main() {
 			fmt.Println(controller.LastUserPosition())
 		}
 		if controller.NextPlayer == 1 { // AI to move
-			controller.UserMove()
+			controller.ComputerMove()
 			fmt.Println("Last position of User:")
 			fmt.Println(controller.LastUserPosition())
 		}

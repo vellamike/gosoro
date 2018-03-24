@@ -137,6 +137,10 @@ func (gc *gamecontroller) ApplyMove(move ds.Move, user int){
 
 }
 
+func (gc * gamecontroller) ComputerMove(){
+
+}
+
 
 
 
