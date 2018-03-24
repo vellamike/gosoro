@@ -6,19 +6,6 @@ package main
 // 2. User is presented with a list of moves. The ruleset/mutator determines which moves are allowed.
 // 3. The move is non-terminating, in which case Step 2 is repeated, or it is terminating, in which case it is the turn of the computer to play.
 
-// Game controller should keep a copy of all boards and moves in order to provide the ruleset with all the information it may require.
-
-// New architecture will look something like this:
-
-// 1. A board - this is a data structure that we basically already have. It may also contain information such as which player is to play next, in the middle of a play, or whether any positions are 'hot'
-// 2. An instruction - When applied to a board this produces a new board. Instruction is a string of characters (same format which the user uses). The board does not "decide" whether a move was valid or not
-// 3. A Mutator - this takes a board and returns all the possible instruction objects. The mutator is specific to the game.
-// 4. An AI - given a minimum of a board on which its turn is due and a mutator the player will decide what move it wants to play to improve its position. In the first instance it will most likely use minimax.
-// 5. A game controller - this is responsible for receiving user input, handing the board between the AI and opponent. The mutator is instantiated with the following:
-//    1. Board originator
-//    2. AI
-//    3. Mutator
-
 import "gosoro/boardgenerators"
 import "gosoro/gamecontrollers"
 import "gosoro/ai"
