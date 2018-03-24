@@ -43,13 +43,9 @@ func main() {
 	for controller.Winner < 0 { // keep looping until there is a winner
 		if controller.NextPlayer == 0 { // user to move
 			controller.UserMove()
-			fmt.Println("Last position of User:")
-			fmt.Println(controller.LastUserPosition())
 		}
 		if controller.NextPlayer == 1 { // AI to move
 			controller.ComputerMove()
-			fmt.Println("Last position of User:")
-			fmt.Println(controller.LastUserPosition())
 		}
 	}
 
