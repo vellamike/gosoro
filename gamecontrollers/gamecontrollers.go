@@ -11,14 +11,12 @@ import "os"
 import "strconv"
 
 type gamecontroller struct {
-	board     ds.Board
-	ai        ai.AI
-	ruleset   rulesets.RuleSet
-	evaluator evaluators.Evaluator
-}
-
-func (self gamecontroller) Winner() int {
-	return 0
+	board      ds.Board //DS which contains the board position, next player to move etc...
+	ai         ai.AI
+	ruleset    rulesets.RuleSet // Decides what moves are allowed
+	evaluator  evaluators.Evaluator
+	Winner     int // which player has won, -1 = neither yet, 0 = player 0, 1 = player 1
+	NextPlayer int
 }
 
 func (self gamecontroller) LastUserPosition() ds.Coord {
@@ -31,7 +29,12 @@ func (self gamecontroller) LastComputerPosition() ds.Coord {
 
 func NewGameController(generator func() ds.Board, ai ai.AI, ruleset rulesets.RuleSet, evaluator evaluators.Evaluator) *gamecontroller {
 	board := generator()
-	b := gamecontroller{board, ai, ruleset, evaluator}
+	b := gamecontroller{board,
+		ai,
+		ruleset,
+		evaluator,
+		-1, // No winner yet
+		0}  // Human to start
 	return &b
 
 }
@@ -76,16 +79,40 @@ func user_move() []ds.Move { // Takes user input as a string and returns a slice
 
 func (gc *gamecontroller) UserMove() {
 	// Ask the user for a move, create an instruction from his reply, apply it to the board
-	moves := user_move()
-	fmt.Println("User's moves:")
-	fmt.Println(moves)
 
-	fmt.Println("Board before user move is executed:")
-	gc.board.Display()
-	for _, move := range moves {
-		gc.board = gc.board.ExecuteMove(move, 1)
+	// STEP 1: Find out what the possible moves are
+
+	validMove := false
+
+	fmt.Println("Computing moves available to user...")
+	availableMoves := gc.ruleset.AvailableMoves(gc.board, 0)
+
+	var move int;
+	for validMove == false {
+		fmt.Println("Available moves are...")
+		for i, move := range availableMoves {
+			fmt.Println(i, move)
+		}
+		fmt.Println("<<<===>>>")
+
+		reader := bufio.NewReader(os.Stdin)
+		fmt.Print("Enter your move: ")
+		text, _ := reader.ReadString('\n')
+		t := string(text)
+
+		fmt.Println("As a string, the selected move is", t)
+		move, _ = strconv.Atoi(t[0 : len(t)-1])
+		fmt.Println("You selected move: ", move)
+
+		// check that the move is valid:
+		validMove = (move > 0) && move < len(availableMoves)
+		if validMove == false {
+			fmt.Println("That move was not a valid move, please try again..")
+		}
 	}
-	fmt.Println("Board after user move is executed:")
+	selectedUserMove := availableMoves[move][0] //I think there is a small fix here somewhere, since available moves should be only one move.
+	gc.board = gc.board.ExecuteMove(selectedUserMove, 1) // board should be updated too, when executing move it should keep a record of what it is doing..
+	fmt.Println("Board after the last move...")
 	gc.board.Display()
 }
 
